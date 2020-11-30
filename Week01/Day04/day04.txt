@@ -1,0 +1,166 @@
+- 자바 언어의 메모리 구조
+참조변수의 자료형 구조
+
+기본 타입(primitive type)
+참조 타입(reference type) : 기본타입을 제외한 나머지는 다 참조 타입
+			String class, Wrapper class, 전부 다 참조
+			(String은 참조지만 예외적으로 기본타입의 선언 방식을
+			 사용할 수 있다.)
+
+int a = 5; 기본형
+int[] a; 배열형 (기본형을 배열로 만들면 배열타입)
+Student st; 참조형
+int a; 기본형
+
+참조형은 기본형으로 갈 수 없지만
+기본형은 배열로 만들면 참조형이 된다.
+
+변수의 메모리 사용
+  기본 타입 변수 - 실제 값
+      ex) int a=5; a안에 5가 들어있는 것
+  참조 타입 변수 - 주소
+      ex) Student st; st안에 주소가 들어있음
+
+stack - 기본형의 실제값이나 참조변수에 주소가 들어있다.
+heap - 참조타입의 값이 들어있고 주소를 stack에 있는 참조변수에 연결한다.
+
+stack은 바로 접근 가능
+heap은 바로 접근 불가능
+항상 stack을 통해서 heap을 접근
+stack과 heap을 연결해주는 주소를 끊으면 기존에 있던 데이터는 Garvage.
+(기존 주소에 다른 값을 입력하면 기존 값을 덮어씌우고 기존에 있던 것은 Garvage가 되는 것)
+ex)String str = "Hi";
+	str = "Bye"; 를 넣을 경우 Hi가 Garvage가 된다.
+
+Garvage collector : Garvage를 모아서 heap을 청소
+		자바에서는 프로그래머가 Garvage collector를 제어하지 못함
+			     운영체제가 대신 해줌(도와줌)
+		C언어는 프로그래머가 제어할 수 있는 장점이 있다.
+
+JVM이 사용하는 메모리 영역
+운영체제에서 할당 받은 메모리 영역(Runtime Data Area)을 세 영역로 구분
+  - Method 영역
+	항상 main메서드부터 시작(이유 : 위에 다른 메서드를 선언해도 main부터 실행)
+	메소드 선언을 하면 밑에서부터 메서드 영역에 데이터가 쌓이고(맨 밑은 main메소드)
+	수행을 할 땐 마지막 넣은 순서부터 역으로 수행하면서 
+	그 메서드의 수행이 끝나면 자신을 호출했던 곳으로 이동해서 그 메서드를 수행
+	ex) main() 안에서 apple()을 호출하고 apple()안에서 orange()를 호출한다면
+		main -> apple -> orange 순으로 메소드영역에 올라가고
+		수행은 orange부터 하고 끝나면 orange를 호출한 apple로 넘어간다.
+
+		ㅣ	 ㅣ
+		ㅣorange()ㅣ	쌓이는 것은 밑에서부터
+		ㅣapple()  ㅣ	실행은 위에서부터 차례대로
+		ㅣmain()	  l
+		-------------
+	
+메소드라고 무조건 메소드 영역에 있는 것은 아님
+	ex) Student 클래스 안에 메소드가 있으면
+	     Student 클래스가 Heap영역에 올라가고 
+	     main에서 Student 안에 있는 메소드를 호출할 때
+	     메소드 영역에 들어간다.
+	     (불러줘야 메소드 영역으로 올라간다. 안부르면 못감)
+	JVM 시작할 때 생성
+	로딩된 클래스 바이트 코드 내용을 분석 후 저장
+	모든 스레드가 공유
+
+  - Heap 영역
+	JVM이 시작할 때 생성
+	new하면 Heap에 올라간다.
+	객체/배열 저장
+	사용되지 않는 객체는 Garbage Collector가 자동으로 제거
+
+  - Stack(Thread)영역
+	스레드 별 생성
+	프로그래머가 제어할 수 있는 영역
+	메소드 호출할 때마다 Frame을 스택에 추가(push)
+	메소드가 종료되면 Frame 제거(pop)
+
+Thread = 동작(실행)시키는 것
+	 멀티 처리 프로그램을 짤 때 필요한 것
+	  (다중으로 처리하는 프로그램 작성)
+
+참조변수의 ==,!= 연산
+	기본 타입 : 변수의 값이 같은지 다른지 조사
+		   기본형일 때 비교하는 연산자 ==,!=
+		   int a = 5;
+		   if(a == 5) System.out.println("같은 수");	값으로 비교
+		   else System.out.println("다른 수");
+
+	참조 타입 : 주소가 같은지 다른지 조사
+		   ==을 사용하면 Heap에서 오는 주소를 비교한다.
+		   ex) a == b = a와 b가 가지고 있는 주소가 같은지 비교
+		   문자열 리터럴이 동일하다면 String 객체 공유
+
+		   참조변수가 가르키고 있는 값을 비교할 때는 .equals() 메소드를 사용
+		   ex) a equals() b = a와 b가 가지고 있는 주소안의 값이 같은지 비교
+
+new를 하면 같은 클래스여도 Heap에 새로운 메모리 공간이 할당된다.(주소가 다름)
+1. new 연산자를 이용한 String 객체 생성
+2. 힙 영역에 새로운 String 객체 생성
+3. String 객체를 생성한 후 주소 리턴
+ex) String a = new String();
+     String b = new String();               Heap에 메모리가 저장되는 공간(주소)이 다름.
+
+＃String클래스만 예외로 문자열이 같을 때 new를 하지 않았다면 같은 주소를 할당
+new 클래스 변수 넣기 String name1 = new String("방준호");
+		    String name2 = new String("방준호");
+힙메모리에 2개의 name1, name2가 생성
+
+String name3="방준호";
+String name4="방준호";
+힙메모리에 1개 생성되고 name3, name4는 같은 주소를 가르킴
+3 == 4 t	주소(heap)
+3.equals(4) t 값
+1 == 2 f 주소(heap)
+1 == 3 f 주소(heap)
+1.equals(4) t 값
+1.equals(2) t 값
+
+null : 변수가 참조하는 객체가 없는 경우 초기값으로 사용가능
+	참조변수 초기값은 null
+	당장 사용을 안하고 선언만 해놓은 뒤 나중에 사용할 경우 null을 넣어놓는다.
+	참조 타입의 변수에만 저장 가능
+	(기본 타입이 쓰려면 Wrapper Class로 사용)
+	null로 초기화된 참조 변수는 스택 영역 생성
+	ex) Student st1 = null;
+		null : heap에서 오는 주소가 없다.
+		비어있다는 의미가 다름
+		heap에 공간이 있을 때 "";를 주면 공간은 있는데 값이 없는것(0)
+		null을 주면 공간 자체가 없는 것
+
+NullPointerException 
+int[] arData = null;
+arData[0] = 10;
+해당하는 배열의 주소에는 null이 있다
+= 주소가 없음 = heap과 연결되지 않음
+= heap에 공간이 없음 = 값을 넣을 수 없음.
+해결 : arData = new int[3];를 하고 arData[0] = 10;
+
+String str = null;
+System.out.println("총 문자수 : " + str.length());
+해당하는 문자열에 null이 담겨있다.
+= 주소가 없음 = heap과 연결되지 않음
+= heap에 공간이 없음 = 값을 넣을 수 없음
+해결 : String str = ""; = 총 문자수 : 0
+	혹은 str = "코리아 IT"; = 총 문자수 : 6
+
+length() : 길이를 구하는 메소드
+
+배열 : 같은 타입의 연속된 공간에 저장하는 자료 구조(같은 타입끼리 묶어놓은 것)
+	int a,b,c,d,e;를 만들면 실제로는 연속으로 있지 않고 여기저기 퍼져있음.
+	배열은 시작주소부터 쭉 나열되어 있다.
+
+장점 : 중복된 변수 선언 줄어듬
+        반복문을 이용해서 요소들을 쉽게 처리함
+
+선언 : int[] intArray = new int[5];
+        int[] intArray = {1,2,3,4,5};
+	
+hashCode : 주소
+
+배열명만 출력하면 뒤에 toString()메소드가 자동으로 붙여서 호출된다.
+toString() : 현재 자료를 문자열로 출력하세요.
+	   배열명의 주소를 문자열로 출력하세요.
+	
+	

@@ -1,0 +1,148 @@
+사용자 정의 예외
+ - 개발자가 직접 정의해서 만드는 예외
+    ex) 조건문으로 if(잔고<출금) 이런 경우 발생하는 예외
+
+사용자 정의 예외클래스 선언
+ - 일반 예외(Exception)로 선언할 경우 Exception을 상속,
+   실행 예외(RuntimeException)로 선언할 경우 RuntimeException을 상속
+ - 사용자 정의 예외클래스 이름은 Exception으로 끝나는게 좋다.
+ - 일반적으로 내부에는 기본생성자와 명시적생성자만 선언한다.★
+   명시적생성자는 String 매개변수를 받고 super()를 사용해서 부모에게 넘겨준다.
+   여기서 받는 String 매개변수는 오류 발생시 catch{ }블록에서 사용할 에러메세지이다.
+   ex) public class XXXException extends Exception{
+	public XXXException(){ }
+	public XXXException(String msg){ 
+	       super(msg);
+	}
+       }
+
+예외 발생시키기
+ - thorw new XXXException();
+   thorw new XXXException(msg);
+   기본생성자나 명시적생성자 중 아무거나 사용가능
+   예외 발생시 catch에서 msg를 출력하고 싶으면 명시적생성자를 사용
+ - 보통 조건문과 같이 쓴다.
+   if(조건식){
+        throw new 예외처리명("msg");
+ - 예외가 발생한 곳에서 예외처리를 해도 되지만 
+   보통은 발생한 곳을 호출한 곳에서 예외처리를 한다.(throws)
+
+예외 정보얻기
+ - 모든 예외는 Exception을 상속받기 때문에
+    Exception의 모든 메소드를 호출할 수 있다.
+    그 중 많이 사용하는 메소드들은
+    getMessage()와 printStackTrace()이다.
+ - getMessage()
+    · 예외 메세지의 내용에는 왜 예외가 발생했는지에 대한 설명이 들어간다.
+      좀 더 상세한 원인을 알기 위해 예외 코드를 예외 메세지에 넣기도 하는데
+      이 예외 메세지는 catch{ }에서 getMessage()의 리턴값으로 얻을 수 있다.
+      ex) throw new XXXException("예외가 났어요");
+      저 "예외가 났어요"는 Exception으로 넘겨지고 getMessage()를 사용하면
+      메세지를 Exception에서 불러와서 getMessage가 리턴값으로 가진다.
+ - printStackTrace()
+    · 예외 발생 코드를 추적해서 모두 콘솔에 출력한다.
+      어떤 예외가 어디에서 발생했는지 상세하게 출력해주기 때문에 
+      ★프로그램을 테스트하면서 오류를 찾을 때 활용된다.
+
+Java API(Library라고도 부른다.)
+ - Java에서 제공하는 API(Application Programming Interface)
+ - 프로그램 개발에 자주 사용되는 클래스 및 인터페이스의 모음
+ - JDK설치경로에 \jre\lib\rt.jar라는 압축파일에 저장 (알아만 두기)
+
+API Document
+ - 쉽게 API를 찾아 이용할 수 있도록 문서(Document)화한 것 (맨날 보는 API)
+ - 좌측상단 = 패키지 전체목록
+   좌측하단 = 패키지 안에 있는 클래스와 인터페이스 목록
+   중앙 = 좌측하단에서 선택한 클래스나 인터페이스의 상세 설명
+	SUMMARY : 중첩클래스 | 필드 | 생성자 | 메소드
+	중앙상단 = 클래스가 포함된 패키지의 정보, 상속 정보, 인터페이스 구현 정보
+	중앙중단 = 간략한 클래스의 설명과 사용 방법
+	중앙하단 = 필드, 생성자, 메소드의 목록
+ - 이클립스에서 클래스를 누르고 F1을 누르면 Help창 -> Java help:에 javadoc가 나오고
+    클릭하면 API Document가 나온다.
+ - 가급적이면 영문으로 된 API 도큐먼트를 보는 것을 권장
+   왜냐하면 정확한 영문 용어를 알아두기 위해서
+
+Java.lang
+ - 자바 프로그램의 기본적인 클래스를 담고 있는 패키지
+ - 유일하게 import 안하고 사용할 수 있다.
+ - 주요클래스 
+    Object, System, Class, String, StringBuffer, StringBuilder, Math, Wrapper
+
+Java.util
+ - 컬렉션 클래스들이 대부분 차지하고 있다.
+ - 주요클래스
+    Arrays, Calendar, Date, Objects, StringTokenizer, Random
+
+Object Class
+ - 모든 클래스의 조상클래스(최상위 부모클래스)
+    = Object의 모든 메소드를 모든 클래스가 사용 가능
+ - equals(Object obj)
+   · equals의 매개변수는 Object 타입이라서 모든 객체가 들어갈 수 있다.
+   · Object의 equals()는 ==과 동일한 결과를 리턴(★주소를 비교)
+     두 객체가 동일한 객체라면 true, 다르면 false
+     String의 equals()가 문자열이 동일한지 비교하는건
+     Object의 equals()을 재정의했기 때문이다.
+ - hashCode()
+   · 주소를 이용해 해시코드를 만들어서 리턴하기 때문에 객체마다 다른 값을 가진다.
+   · hashCode()를 실행해서 리턴된 해시코드 값이 같은지 보고 같다면
+     equals()로 다시 비교해서 같으면 동등객체
+     hashCode()나 equals()에서 하나라도 다르면 다른객체
+ - toString()
+   · 참조타입의 주소를 문자열로 리턴한다.(잘 안쓰는 정보)
+   · 주로 toString()은 재정의해서 return에 원하는 값을 넣고 리턴 받도록 사용한다.
+   · System.out.println();을 안쓰고 바로 정보를 출력할 수 있다.
+ - clone()
+   · 원본 객체의 필드값과 동일한 값을 가지는 새로운 객체를 생성하는 것
+   · 객체를 복제하는 이유는 원본 객체를 안전하게 보호하기 위해서
+   · 복제하려면 원본 객체는 반드시 java.lang.Cloneable를 implements 해야 한다.
+     = 클래스 설계자가 복제를 허용한다는 의도적인 표시
+        연결하지 않으면 clone()를 호출할 때 CloneNotSupportedException 예외가 발생
+        clone()은 예외처리가 필요한 메소드라서 try-catch를 써야 한다.
+   · 얕은 복제(thin clone)
+      - 단순히 필드값을 복사해서 객체를 복제하는 것
+      - 필드가 기본형일 때 값이 복사되고, 참조형일 때 객체의 주소가 복사된다.
+      - Object의 clone()
+      - 원본 타입의 메소드에 원본 타입의 복제 객체를 생성해서 null값을 주고
+        try-catch로 복제 객체에 clone()를 넣기
+        (여기서 clone()는 Object 타입이기 때문에 형변환을 해준다.)
+        catch에는 CloneNotSupportedException을 넣고 리턴값을 복제한 객체를 준다. 
+        ex) public 원본클래스 메소드명(){
+	     원본클래스 복제객체 = null;
+	          try{
+	               복제객체 = (원본클래스) clone();//clone()은 Object의 메소드
+	          }catch(CloneNotSupporetedException e){ }
+	          return 복제객체;
+            }        
+   · 깊은 복제(deep clone)
+      - 얕은 복제에서 참조형일 때 원본과 복제가 같은 주소를 가르킨다면,
+        깊은 복제에서 참조형은 참조하고 있는 객체도 복제하는 것
+        = 원본이 참조하는 객체와 똑같은 객체를 만들어서 복제에게 준다.(다른 주소를 가진다.)
+      - Object의 clone()을 재정의해서 참조 객체를 복제하는 코드를 직접 작성
+      - clone()을 먼저 재정의 하고 CloneNotSupprotedException을 던진다.
+        원본클래스 복제객체에 원본클래스 타입으로 형변환한 Object의 clone()를 호출한다.
+        배열과 다른 클래스의 객체를 복제하고 깊은 복제된 복제객체를 리턴한다.
+        다음은 얕은 복제와 같지만 try-catch로 복제 객체에 clone()를 넣을 때
+        위에서 재정의한 clone()을 호출하는 것.
+        ex) protected Object clone() throws CloneNotSupportedException{
+	     원본클래스 복제객체 = (원본클래스) super.clone();//clone()는 Object의 메소드
+                 //배열 깊은 복제
+                 복제객체.배열명 = Arrays.copyOf(this.배열명, this.배열명.length);
+	     //다른클래스의 객체 깊은 복제
+                 복제객체.다른클래스의 객체 = new 다른클래스(this.다른클래스의 객체.다른클래스의 멤버);
+	     return 복제객체;
+            }      
+            public 원본클래스 메소드명(){
+	     원본클래스 복제객체 = null;
+	          try{
+	               복제객체 = (원본클래스) clone();//clone()은 재정의된 clone() 메소드
+	          }catch(CloneNotSupporetedException e){ }
+	          return 복제객체;
+            }
+	위의 this.은 생략가능
+※얕은복제와 깊은복제 둘 다 사용할 때는 원본객체를 만들어주고
+  복제할 객체를 생성해서 원본객체.위에서 만든 복제메소드()로 넣어준다.
+  = Test origin = new Test();
+     Test copy = origin.getTest();
+
+※<>은 제네릭, 들어갈 자료를 미리 세팅해주는 것
