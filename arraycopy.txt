@@ -1,0 +1,11 @@
+arraycopy 메서드
+
+System Class에 있는 메서드로 배열을 쉽게 복사할 수 있다.
+
+System.arraycopy(Object src, int srcPos, Object dest, int destPos, int length);
+	
+	Object src = 복사하고자 하는 배열명(원본)
+	int srcPos = 복사할 시작 위치 
+	Object dest = 복사를 받을 배열명(복사본)
+	int destPos = 자료를 받아서 저장할 시작 위치
+	int length = 원본에서 복사본까지 얼만큼 읽어 올지 입력(정수로 입력)
