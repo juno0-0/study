@@ -1,0 +1,20 @@
+D드라이브 -> github 우클릭 -> Git Bash Here
+
+파일올리기
+git status
+ - 현재 폴더와 git repository간의 싱크 상태를 체크
+git add .
+ - 트래킹되어 있지 않은 파일을 트래킹 해주는 명령어
+    폴더에 모든 파일을 트래킹한다는 뜻
+git commit -m "msg"
+ - git에 push할 때 알리기 위한 커밋을 달아주는 명령어
+git push origin master
+ - git에 올려주는 명령어
+
+파일 내려받기
+새폴더 만들고 우클릭 Git Bash Here
+git init
+git remote add origin http://~주소
+git pull origin master
+
+github에 연동해놓은 해당파일을 변경할 경우
