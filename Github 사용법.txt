@@ -18,3 +18,4 @@ git remote add origin http://~주소
 git pull origin master
 
 github에 연동해놓은 해당파일을 변경할 경우
+git commit을 바꾸고 push해야 올라간다.
