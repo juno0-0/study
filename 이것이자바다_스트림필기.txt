@@ -1,0 +1,571 @@
+
+스트림
+ - 스트림은 반복자
+  · 컬렉션(배열 포함)의 요소를 하나씩 참조해서 람다식으로 처리할 수 있는 반복자
+    ※ 람다식이 자바 8버전부터 허용되었기 때문에 스트림도 자바 8버전부터 허용
+     - 자바 7 이전에는 Iterator를 사용했지만
+       자바 8부터 Stream 사용(Iterator를 사용해도 상관 없음)
+       ex) Iterator 사용  
+	List<String> list = Arrays.asList("str","str","str");
+	Iterator<String> iterator = list.iterator();
+	while(iterator.hasNext()){
+	     String name = iterator.next();
+	     System.out.println(name);
+	}
+
+           Stream 사용(코드가 더 간결하다.)
+           List<String> list = Arrays.asList("str","str","str");	
+           Stream<String> stream = list.stream();//stream 타입을 리턴
+           stream.forEach(name -> System.out.println(name));
+           (forEach() : 요소를 계속 하나씩 가져와라
+             = forEach가 가져온 요소를 하나씩 name에 넣어준다.)
+
+           while(iter.hasNext()){
+                iter.next();	    =    stream.forEach();
+           }
+
+ - 스트림의 특징
+  · 람다식으로 요소 처리 코드를 제공
+    - 스트림이 제공하는 대부분의 요소 처리 메소드는 함수적 인터페이스 매개타입을 가진다.
+    - 매개값으로 람다식 또는 메소드 참조를 대입할 수 있다.
+    ex) List<Student> list = Arrays.asList(
+	new Student("홍길동",90),
+	new Student("신용권",92));
+
+        Stream<Student> stream = list.stream();
+        stream.forEach(s -> {
+	String name = s.getName();
+	int score = s.getScore();		
+	System.out.println(name+"-"+score);
+        }; 이 람다식이 forEach()의 매개값
+           forEach(Consumer<? super T> action)라는 매개변수를 받기 때문에
+           forEach()를 호출할 때 Consumer에 대한 람다식을 제공하면 된다.★
+                                      (매개값을 받지만 리턴이 없음)
+
+  · 내부 반복자를 사용하므로 병렬 처리가 쉽다.
+    - 외부 반복자 : 개발자가 코드로 직접 컬렉션 요소를 
+		반복해서 요청하고 가져오는 코드 패턴(Iterator)
+                        개발자 코드에서 next()를 쓰면 
+                        컬렉션에서 요소 1개를 개발자 코드로 가져와서 처리
+                        이것을 반복한다.
+    - 내부 반복자 : 컬렉션 내부에서 요소들을 반복시키고
+		개발자는 요소당 처리해야할 코드만 제공하는 코드 패턴(Stream)
+		개발자가 요소를 이렇게 처리해라 하는 람다식을(처리 코드를) 
+		컬렉션에 제공해주면 컬렉션은 Stream을 이용해서 
+		개발자 코드에서 받은 람다식을 요소마다 적용해서 처리
+    - 내부 반복자의 이점
+      1. 개발자는 요소 처리 코드에만 집중
+         (외부 반복자는 컬렉션에 값이 있는지 확인하고 있으면 가져와야 하는데
+          내부 반복자는 컬렉션에 값이 있는지 따로 확인하지 않아도 된다.)
+      2. 멀티 코어 CPU를 최대한 활용하기 위해 요소들을 분배시켜 
+          병렬 처리 작업을 할 수 있다.
+    - 병렬 처리 : 한가지 작업을 서브 작업으로 나누고,
+                     서브 작업들을 분리된 스레드에서 병렬적으로 처리한 후,
+                     서브 작업들의 결과들을 최종 결합하는 방법
+                     (코어마다 단일스레드로 처리하고 나온 결과를 결합)
+                     ※ 병렬 처리가 가능한 스트림을 얻으면 내부적으로는
+                         ForkJoinPool 프레임워크를 이용해서 병렬 처리를 하는 것
+                     ex) List<String> list = Arrays.asList("홍길동","신용권","감자바","람다식","박병렬");
+		  //순차 처리(싱글 스레드로 요소들을 반복적으로 처리)
+		  Stream<String> stream = list.stream();
+		  stream.forEach(ParallelExample::print);
+		  스레드 1개가 전부 처리함
+
+		  //병렬 처리(멀티 스레드로 요소들을 병렬적으로 처리)
+		  Stream<String> parallelStream = list.parallelStream();
+		  parallelStream.forEach(ParallelExample::print);
+		  스레드 3개가 처리함
+                          ※ stream()을 쓰면 싱글 스레드, parallelStream()을 쓰면 멀티 스레드
+
+    - 중간 처리와 최종 처리를 할 수 있다.
+      · 중간 처리 : 요소들의 매핑, 필터링, 정렬
+	          요소들을 최종 처리 하기 전 단계
+	          안해도 상관없고 여러번 해도 상관 없다.
+      · 최종 처리 : 반복, 카운트, 평균, 총합
+      ※ StreamPipeline 그림판으로 그린 그림 참고하기
+
+ - 스트림의 종류
+  · 스트림이 포함된 패키지
+   - BaseStream : 모든 스트림에서 사용할 수 있는 
+	          공통 메소드들이 정의되어 있을 뿐
+	          코드에서 직접적으로 사용되지는 않는다.
+	          모든 스트림은 BaseStream을 상속받는다.
+   - Stream : 객체 요소를 처리하는 스트림
+   - IntStream : int 요소를 처리하는 스트림
+   - LongStream : long 요소를 처리하는 스트림
+   - DoubleStream : double 요소를 처리하는 스트림
+
+  · 스트림 구현 객체를 얻는 방법
+   - 스트림은 요소를 처리하는 반복자이기 때문에
+      요소를 제공해주는 어떤 소스든지 구현 객체를 얻을 수 있다.
+     · 컬렉션 : 객체를 저장하기 때문에 객체를 요소로 해서 스트림을 얻을 수 있다.
+	      모든 컬렉션에서 스트림을 얻을 수 있진 않음
+	      (java.util.Collection을 구현한 컬렉션(List, Set)만 스트림을 얻을 수 있다.)
+	      stream(), parallelStream()
+     · 배열 : 인덱스로 관리하는 요소로 스트림을 얻을 수 있음
+	   Arrays클래스를 이용해서 얻거나 직접 Stream 인터페이스를 이용하는 방법이 있다.
+	   Arrays.stream()이라는 정적 메소드를 이용하거나
+	   Stream.of()라는 정적 메소드를 이용
+     · int 범위 : 시작값과 끝값 사이에 있는 정수를 요소로 스트림을 얻을 수 있음
+	       IntStream.range(시작값, 끝값(포함x))
+	       IntStream.rangeClosed(시작값, 끝값(포함o))
+	       두 개의 차이는 끝값을 포함하느냐 안하느냐의 차이
+     · long 범위 : int 범위와 동일하다. (LongStream을 이용)
+     · 디렉토리 : 디렉토리 하위에 있는 파일이나 디렉토리의 path정보를 요소로 스트림을 얻을 수 있음
+                    ※ Path : 파일의 경로를 표현하는 인터페이스
+	        Files 클래스의 find()와 list()를 이용
+	        find() : 매개값으로 주어지는 BiPredicate가 true인 파일만 뽑아서 
+		     그 경로를 요소로 스트림을 얻는다.
+	        list() : 매개값으로 주어지는 디렉토리 안에 있는 
+		    모든 파일들의 경로를 요소로 스트림을 얻는다.
+     · 파일 : 파일 안에 있는 내용의 한 줄씩을 요소로 스트림을 얻는다.(문자 파일만 가능)
+	   (한 줄씩을 요소로 얻어서 Stream의 제네릭 타입이 String인 것)
+	   Files.lines() : lines()가 매개값으로 얻는 Path는 파일의 경로, 
+		       Charset은 파일 안에 있는 문자셋의 종류
+               BufferedReader.lines() : 문자 파일을 읽어서 한 줄씩 얻는 것
+               ※ BufferedReader는 문자 파일을 읽어서 그 문자 파일의 내용을 얻을 때 사용
+     · 랜덤수 : 랜덤수를 요소로 스트림을 얻을 수 있음
+                  Random 클래스의 doubles(), ints(), longs()를 사용한다.
+	      (매개값으로 정수를 주면 그 정수만큼 랜덤수를 얻어온다.)
+
+  · 컬렉션으로부터 스트림 얻기
+   - List<Student> studentList = Arrays.asList( //List를 생성한 다음에 
+		new Student("홍길동",10),  //여기있는 객체를 이용해 스트림을 얻을 때
+		new Student("신용권",20),
+		new Student("유미선",30)
+     );
+     Stream<Student> stream = studentList.stream(); 
+     //List의 참조변수.stream()를 호출하면 Stream 객체를 얻는다.
+     //Stream의 타입 파라미터가 Student가 들어간 이유는
+     //List의 Student 객체가 요소가 되어서 Stream에서 반복적으로 처리가 되는 것
+     stream.forEach(s -> System.out.println(s.getName()));
+
+  · 배열로부터 스트림 얻기
+   - String[] strArray = {"홍길동","신용권","김미나"};//이 문자열 타입의 배열을
+     Stream<String> strStream = Arrays.stream(strArray);//Arrays.stream()을 이용해서 스트림으로 얻음
+     strStream.forEach(a -> System.out.print(a + ","));
+     System.out.println();
+
+     int[] intArray = {1,2,3,4,5};
+     IntStream intStream = Arrays.stream(intArray);
+     intStream.forEach(a -> System.out.println(a + ","));
+     System.out.println();
+     
+  · 숫자 범위로부터 스트림 얻기	
+   - IntStream stream = IntStream.rangeClosed(1, 100);
+     stream.forEach(a -> sum += a);
+     System.out.println("총합 : " + sum);         
+
+  · 파일로부터 스트림 얻기
+   - Path path = Paths.get("파일의 주소");
+     Stream<String> stream;
+     //Files.lines() 이용
+     stream = Files.lines(path, Charset.defaultCharset());//Charset.defaultCharset() : 운영체제가 기본적으로 사용하고 있는 문자셋
+     stream.forEach( System.out::println);//메소드 참조
+     (stream.forEach(s -> System.out.println(s));//람다식
+     System.out.println();
+
+     //BufferedReader의 lines() 이용
+     File file = path.toFile();//파일 객체 얻기
+     FileReader fileReader = new FileReader(file);//FileReader : 문자 파일을 읽는 Stream
+     BufferedReader br = new BufferedReader(fileReader);//BufferedReader : 읽기 성능 향상
+     stream = br.lines();//lines() : 파일에서 한 줄씩 가져와서 stream을 얻는다.
+     stream.forEach(System.out::println);
+
+  · 디렉토리로부터 스트림 얻기
+   - Path path = Paths.get("파일 또는 서브 디렉토리의 주소");
+     Stream<Path> stream = Files.list(path);//list() : 매개값의 주소를 요소로 하는 Stream을 얻는다.
+     stream.forEach(p -> System.out.println(p.getFileName()));
+     실행 결과 : Paths.get()의 매개값으로 받은 주소 안에 있는 모든 폴더를 출력
+
+ - 스트림 파이프라인
+  · 중간 처리와 최종 처리
+   - 보통 최종 처리는 Reduction이라는 행위를 한다.
+   - 리덕션(Reduction)
+    · 전체 요소에서 하나의 값을 산출하는 것
+      ※ 하나의 값 : 합계, 평균, 카운팅, 최대값, 최소값 등
+                        ex) 값이 100개가 있으면 그 값의 평균을 산출 = 리덕션
+    · 요소가 리덕션의 결과물로 바로 집계할 수 없을 경우 중간 처리가 필요
+      ※ 중간 처리 : 필터링, 매핑, 정렬, 그룹핑
+                        ex) 전체 학생 중 남학생의 평균 점수가 필요한 경우 
+		     중간 처리 후 최종 처리를 해서 리덕션 결과물을 산출
+   - 스트림은 중간 처리와 최종 처리를 파이프라인으로 해결
+    · 파이프라인 : 스트림을 파이프처럼 이어 놓은 것
+	          최종 처리는 마지막에 있는 중간 스트림을 가지고 리덕션을 한 것
+                      StreamPipeline 그림 참고하기
+    · 최종 스트림의 집계 기능이 시작되기 전까지 중간 처리는 지연된다.(그 전까지 중간 처리는 동작을 하지 않음)
+      ※ 최종 스트림의 집계 기능 : 마지막 중간 스트림에서 최종 처리를 하기 위해 
+			      최종 처리 집계 기능의 메소드를 호출하는 것
+			      ex) 전체 학생 중 남학생의 평균 점수를 구할 때
+			           미리 필터링으로 남학생만 구한 뒤 매핑으로 점수를 얻어내고
+			           기다리는게 아니라, 최종 처리를 시작하는 순간 중간 처리가 시작되는 것.
+
+     - ex) 회원 컬렉션에서 남자 회원의 평균 나이 구하기
+	Stream<Member> maleFemaleStream = list.stream();
+	Stream<Member> maleStream = maleFemaleStream.filter(m->m.getSet()==Member.MALE);
+            //maleFemaleStream 상쇄
+	IntStream ageStream = maleStream.mapToInt(Member::getAge);
+            //maleStream 상쇄
+	OptionalDouble optionalDouble = ageStream.average();
+            //ageStream 상쇄
+	double ageAvg = .getAsDouble();//optionalDouble 상쇄하고 나머지는 "."로 연결
+			    ↓
+	double ageAvg = list.stream()//오리지널 스트림
+	.filter(m->m.getSet()==Member.MALE)//중간 처리 스트림
+	.mapToInt(Member::getAge)//중간 처리 스트림
+	.average()//최종 처리 스트림
+	.getAsDouble();
+
+  · 중간 처리 메소드와 최종 처리 메소드
+   - 중간 처리 메소드는 요소를 필터링, 매핑, 정렬, 그룹핑해서 중간 Stream을 만들어내고
+      최종 처리 메소드는 합계, 평균, 카운팅, 최소값, 최대값을 산출(리덕션)하는 역할
+   - 중간 처리 메소드는 리턴 타입이 Stream
+      최종 처리 메소드는 리턴 타입이 기본 타입이거나 OptionalXXX
+   - 최종 처리 메소드가 호출이 되어야 중간 처리 메소드가 실행된다.★★★★★
+      (그 전까지 중간 처리 메소드는 지연)
+
+  · 필터링
+   - distinct(), filter()
+    · distinct() : 중복 제거
+     - Stream에 따라서 요소가 동일한 요소인지 아닌지 비교하는 방법이 다름
+     - Stream : equals()가 true면 동일한 객체로 판단하고 중복 제거
+     - IntStream, LongStream, DoubleStream : 동일값일 경우 중복을 제거
+    · filter() : 조건이 참인 것만 리턴
+     - 매개값으로 주어진 predicate가 ture를 리턴하는 요소만 필터링
+
+  · 매핑(mapping)
+   - 스트림의 요소를 다른 요소로 대체
+      (하나의 요소가 여러개의 요소로 대체될 수도 있다.)
+   - flatXXX(), mapXXX(), asDoubleStream(), asLongStream(), boxed()
+    · flatXXX() : 한 개의 요소를 여러개의 요소들로 대체
+	       ex) "Hello Java"를 받아서 split(" ")를 사용하여 "Hello"와 "Java"로 대체
+                        A,B를 받으면 A는 A1,A2로 B는 B1,B2로 만들어서
+                        A1,A2,B1,B2를 갖는 새로운 스트림을 리턴
+		(한 개를 여러개로★)
+
+    · mapXXX() : 요소를 다른 요소로 대체
+                     A,B를 받으면 A를 C로, B를 D로 만들어서
+	         C,D를 갖는 새로운 스트림을 리턴
+	         (한 개를 한 개로★)
+                     DoubleUnaryOperator : double을 받아서 연산 후 double로 리턴
+				   (같은 double이지만 값이 다른 새로운 double)
+
+    · asDoubleStream(), asLongStream(), boxed()
+     - asDoubleStream() : IntStream이나 LongStream을 DoubleStream으로 변환
+     - asLongStream() : IntStream을 LongStream으로 변환
+     - boxed() : 기본형을 래퍼클래스로 박싱해서 스트림으로 변환
+	       (기본형을 객체로 변환)
+
+  · 정렬
+   - sorted() : 중간 처리 기능으로 최종 처리되기 전에 요소를 정렬
+    · int, long, double은 기본적으로 오름차순 정렬
+    · 요소가 객체일 경우 매개변수를 비워두면 Compareable 구현 방법에 따라 정렬하고,
+      (Comparable을 구현(implements)하지 않으면 ClassCastException 발생)
+      ex) 객체 요소가 Comparable을 구현하고 있고,
+           기본 비교 방법(오름차순)으로 정렬하는 세 가지 방법
+           sorted();
+           sorted((a,b) -> a.compareTo(b));
+           sorted(Comparator.naturalOrder());
+
+      매개변수에 Comparator<T>를 주면 Comparator에 따라 정렬
+      (Comparable을 구현하지 않았거나, 구현 했다 하더라도 다른 비교 방법으로 정렬할 때 사용)
+      sorted((a,b) -> {
+             여기에는 a,b를 비교해서 a가 작으면 음수,
+	 같으면 0, a가 크면 양수를 리턴하는 코드 작성
+      })
+      ex) 요소가 Comparable을 구현하고 있지만,
+           기본 비교 방법과 정반대(내림차순) 방법으로 정렬
+           sorted((a,b) -> b.compareTo(a));
+           sorted(Comparator.reverseOrder());
+
+  · 루핑
+   - 중간 처리, 최종 처리 기능으로 요소 전체를 반복
+    · peek() : 중간 처리 메소드
+                 최종 처리 메소드가 실행되지 않으면 지연되기 때문에
+	     최종 처리 메소드가 호출되야 동작
+                 ex) [루핑 미동작]
+	          intStream
+	          .filter(a->a%2==0)
+	          .peek(a->System.out.println(a))
+	          최종 처리 메소드가 호출 되지 않아서 아무것도 동작하지 않음
+
+                     [루핑 동작]	         
+	         intStream
+	         .filter(a->a%2==0)
+	         .peek(a->System.out.println(a))
+	         .sum()//최종 처리를 해서 루핑(중간 처리)이 동작
+    · forEach() : 최종 처리 메소드 
+
+  · 매칭
+   - 최종 처리 기능
+   - 요소들이 특정 조건을 만족하는지 조사해서 boolean타입으로 리턴
+    · allMatch() : 모든 요소들이 매개값으로 주어진 
+	         Predicate의 조건을 만족하면 true
+    · anyMatch() : 최소한 한 개의 요소가 매개값으로 주어진 
+	          Predicate의 조건을 만족하면 true
+    · noneMatch() : 모든 요소들이 매개값으로 주어진 
+		Predicate의 조건을 만족하지 않으면 true
+
+    · int[] intArr = {2,4,6};
+      boolean result = Arrays.stream(intArr).allMatch(a->a%2==0);
+      intArr의 모든 값이 2의 배수인가? true
+      
+      result = Arrays.stream(intArr).anyMatch(a->a%3==0);
+      intArr에 3의 배수가 있는가? true
+
+      result = Arrays.stream(intArr).anyMatch(a->a%3==0);
+      intArr에 3의 배수가 전혀 없는가? false
+
+  · 집계(Aggregate)
+   - 최종 처리 기능
+    · 카운팅, 합계, 평균값, 최대값, 최소값 등과 같이 하나의 값으로 산출
+    · 대량의 데이터를 가공해서 하나의 데이터로 만드는 리덕션
+
+   - 스트림이 제공하는 기본 집계 함수
+    · count() : 요소 개수
+    · findFirst() : 첫번째 요소
+    · max() : 최대 요소
+    · min() : 최소 요소
+    · average() : 요소 평균
+    · sum() : 요소 총합
+
+  · OptionalXXX 클래스
+   - 값을 저장하는 값 기반 클래스
+   - Optional, OptionalDouble, OptionalInt, OptionalLong
+   - 저장된 값을 얻으려면 get(), getAsDouble(), getAsInt(), getAsLong() 호출
+   - 집계값이 존재하지 않을 경우 디폴트 값을 설정할 수도 있다.
+   - 집계 값을 처리하는 Consumer를 등록할 수 있다.
+    · isPresent() : 값이 있니?
+    · orElse() : 값이 저장되어 있지 않을 경우 매개변수로 넣은 값이 디폴트 값
+    · ifPresent() : 값이 저장되어 있을 경우 Consumer 처리
+
+  · 커스텀 집계
+   - reduce() : 프로그램화해서 다양한 집계(리덕션) 결과물을 만들 수 있다.
+                  각 Stream별로 Optional<T>를 리턴하는 reduce()와 (요소가 없으면 예외 발생)
+                                                 T를 리턴하는 reduce()가 있다. (요소가 없으면 T를 결과로 준다.)
+    · 매개변수
+     - XXXBinaryOperator : 두 개의 매개값을 받아 연산후 리턴하는 함수적 인터페이스
+     - identity : 스트림에 요소가 전혀 없을 경우 리턴될 디폴트 값
+     ex) int sum = studentList.stream().map(Student::getScore).reduce((a,b)->a+b).get();
+         //NoSuchElementException이 발생할 수도 있어서
+         int sum = studentList.stream().map(Student::getScore).reduce(0, (a,b)->a+b);
+         //이쪽을 더 권장함
+
+  · 수집
+   - 최종 처리 기능으로 요소들을 수집 또는 그룹핑한다.
+    · 필터링 또는 매핑된 요소들로 구성된 새로운 컬렉션 생성
+    · 요소들을 그룹핑하고, 집계(리덕션)를 할 수 있다.
+      ex) 전체 학생 중 남학생(그룹핑)의 평균학점(매핑,집계), 
+           여학생(그룹핑)의 평균학점(매핑,집계)을 구해서 Map으로 구성
+
+   - 필터링한 요소 수집  
+    · collect(Collector<T,A,R> collector)
+     - T : 요소, A : 누적기(T를 컬렉션에 수집), R : T 요소가 수집될 컬렉션 
+       = T를 A가 R에 저장
+
+    · Collector의 구현 객체
+     - Collectors 클래스의 정적 메소드 이용
+       · toList() : List 컬렉션에 요소를 수집하는 컬렉터를 얻는다.
+       · toMap() : Map 컬렉션에 요소를 수집하는 컬렉터를 얻는다.
+       · toSet() : Set 컬렉션에 요소를 수집하는 컬렉터를 얻는다.
+       · toConcurrentMap() : 멀티 스레드 환경에서 스레드의 안전한 ConcurrentMap을 만들어서
+			거기에 요소를 수집하는 컬렉터를 얻는다.
+       · Collectors.toCollection{ : Supplier<T>가 제공해주는 컬렉션에 요소를 수집하는 컬렉터를 얻는다.
+	     supplier<T>
+         }
+       ※ 누적기가 ?인 이유 : List, Set, Map는 컬렉터 내부에서 컬렉션에 저장하는 방법을 
+		           이미 알고 있기 때문에 별도의 누적기 필요 없다.
+       · 전체 학생 List에서 남학생들만 별도의 List로 생성
+         List<Student> maleList = totalList.stream()
+         .filter(s->s.getSex()==Student.Sex.MALE)
+         .collect(Collectors.toList()); 
+ 
+       · 전체 학생 List에서 여학생들만 별도의 HashSet으로 생성 
+         Set<Student> femaleSet = totalList.stream()
+         .filter(s->s.getSex()==Student.Sex.FEMALE)
+         .collect(Collectors.toCollection(HashSet::new));
+
+   - 사용자 정의 컨테이너에 수집
+    · 요소를 개발자가 만든 클래스에 수집
+    · collect(Supplier<R>, XXXConsumer<R>, BiConsumer<R,R>)
+     - Supplier<R> : 요소들이 수집될 컨테이너 객체를 생성하는 역할
+        1) 순차 처리(싱글 스레드) 스트림 : 단 한 번 Supplier가 실행
+        2) 병렬 처리(멀티 스레드) 스트림 : 스레드별로 Supplier가 실행되어 
+				   스레드별로 컨테이너가 생성
+				   (스레드의 갯수만큼 Supplier가 호출되서 
+				    컨테이너 객체를 만든다.)
+     - XXXConsumer<R> : 요소를 사용자 정의 컨테이너에 수집하는 역할
+        · 스트림에서 요소를 컨테이너에 누적할 때마다 실행 
+     - BiConsumer<R,R> : 병렬 처리와 관련
+        1) 순차 처리(싱글 스레드) 스트림 : 실행되지 않음(실행되지 않아도 객체는 만들어줘야 함)
+        2) 병렬 처리(멀티 스레드) 스트림 : 스레드별로 생성된 컨테이너를 결합해서 최종 컨테이너를 완성
+     - collect()가 리턴하는 R : 사용자 정의 컨테이너
+
+   - 요소를 그룹핑해서 수집
+    · collect()는 단순히 요소를 수집하는 기능 이외에
+      컬렉션의 요소들을 그룹핑해서 Map 객체로 생성하는 기능도 제공
+       (전체 학생 중 남학생은 남학생 Key로 저장하고 여학생은 여학생 Key로 저장)
+     - 매개값으로는 groupingBy(), groupingByConcurrent()가 리턴하는 객체를 준다.
+        groupingBy() : 스레드에 안전하지 않은 Map 생성
+		   (싱글스레드 환경에서 사용하는 컬렉션)
+        groupingByConcurrent() : 스레드에 안전한 ConcurrentMap 생성
+			     (멀티스레드 환경에서 사용하는 컬렉션)
+     - 어떤 메소드를 사용하느냐에 따라 Value에 들어가는 값이 달라진다.
+     1) groupingBy(Function<T,K> classifier)
+         groupingByConcurrent(Function<T,K> classifier)
+         = T를 K로 매핑하고 K(Key)에 저장된 List에 T를 저장한 Map 생성
+         = Key로 값이 주어지고 Key에 대한 Value로 List 객체가 들어가고 List 객체 안에 요소가 저장
+            (Key는 매개값으로 주어지는 Function에 따라서 결정)
+            (Function은 어떤 요소를 어떤 Key에 저장할지 정의)
+
+     2) groupingBy(Function<T,K> classifier,
+		Collector<T,A,D> downstream)
+         groupingBy(Function<T,K> classifier,
+		Collector<T,A,D> downstream)
+         		T : 원래 요소의 타입
+		A : 누적기
+		D : Value에 저장될 컬렉션의 타입
+		= 원래 요소를 누적기로 D에 입력된 컬렉션에 저장
+         Key로 객체(요소)를 저장하는데 순수한 요소(T)를 저장하는 것이 아니라 T를 매핑한 객체를 저장
+         ex) 남학생을 저장할 때 남학생을 직접 저장하는 것이 아니라 
+	  남학생의 이름만 저장하거나, 남학생의 점수만 저장(남학생을 대체한 다른 요소들을 저장)
+              여기서 이름을 저장할지 점수를 저장할지는 Collector에서 정한다.
+
+     3) groupingBy(Function<T,K> classifier,
+		Supplier<Map<K,D>> mapFactory,
+		Collector<T,A,D> downstream)
+         groupingBy(Function<T,K> classifier,
+		Supplier<ConcurrentMap<K,D>> mapFactory,
+		Collector<T,A,D> downstream)
+         2번과 차이점은 자동적으로 만들어진 Map 객체를 사용하느냐,
+		     Supplier가 제공하는 Map 객체를 사용하느냐의 차이
+
+     ex) 학생의 성을 Key로 남학생 List와 여학생 List가 저장된 Map 얻기
+          groupingBy(Function<T,K> classifier) 사용
+          Map<Student.Sex, List<Student>> mapBySex = totalList.stream()
+          .collect(Collectors.groupingBy(Student::getSex));
+          ※ GroupingBy 그림 참고하기
+
+     ex) 학생의 거주 도시를 Key로 해서 학생의 이름 List가 저장된 Map 얻기
+          groupingBy(Function<T,K> classifier, Collector<T,A,D> downstream) 사용
+          Map<Student.City, List<String>> mapByCity = totalList.stream()
+          .collect(Collectors.groupingBy(
+	             Student::getCity,
+		 Collectors.mapping(Student::getName,Collectors.toList()));
+          ※ GroupingBy2 그림 참고하기
+
+   - 그룹핑 후 매핑 및 집계(리덕션)
+    · Collectors.groupingBy()는 그룹핑 후,
+      매핑이나 집계(평균, 카운팅, 연결, 최대, 최소, 합계)를 할 수 있도록 하기위해
+      두 번째 매개값으로 다음과 같은 Collector를 가질 수 있다.
+     - mapping(Function, Collector), averagingDouble(ToDoubleFunction), counting(), 
+       joining(...) : 문자 요소들을 연결,
+       maxBy(Comparator), minBy(Comparator), 
+       reducing(...) : 커스텀 리덕션 값, 
+       summarizingXXX(ToXXXFunction) : XXX 타입의 한계
+     ex) 성을 키로, 남/여 학생 평균 점수를 값으로 갖는 Map 얻기
+          Map<Student.Sex, Double> map = totalList.stream()
+          .collect(
+               Collectors.groupingBy(
+                    Student::getSex,
+                    Collectors.averagingDouble(Student::getScore)));
+
+     ex) 성을 키로, 쉼표로 구분된 학생 이름 문자열을 값으로 갖는 Map 얻기
+          Map<Student.Sex, String> mapByName = totalList.stream()
+          .collect(
+               Collectors.groupingBy(
+                    Student::getSex,
+                    Collectors.mapping(
+                         Student::getName,
+                         Collectors.joining(","))));//","로 연결한다.
+
+ - 병렬 처리 : 동시에 처리하는 것
+  · 멀티 코어 CPU환경에서 하나의 작업을 분할해서 각각의 코어가 병렬적으로 처리
+   - 병렬 처리의 목적 : 작업 처리 시간을 줄임
+                             자바8부터 병렬 스트림을 제공하므로
+                             컬렉션(배열)의 전체 요소 처리 시간을 줄여주는 것
+   - 동시성과 병렬성
+     · 동시성 : 멀티 스레드 환경에서 스레드가 번갈아가며 실행하는 성질(싱글 코어 CPU)
+     · 병렬성 : 멀티 스레드 환경에서 코어들이 스레드를 병렬적으로 실행하는 성질(멀티 코어 CPU)
+
+  · 병렬성 구분
+   - 데이터 병렬성 : 한 작업 내에 있는 전체 데이터를 쪼개어 서브 데이터들로 만들고
+		   이 서브 데이터들을 병렬 처리해서 작업을 빨리 끝내는 것
+   - 작업 병렬성 : 서로 다른 작업을 병렬 처리하는 것
+		대표적인 예는 웹서버
+		웹서버는 각각의 브라우저에서 요청한 내용(다른 작업)을 개별 스레드에서 병렬로 처리
+
+  · 병렬 스트림은 데이터 병렬성을 구현한 것
+   - 멀티 코어의 수만큼 대용량 요소를 서브 요소들로 나누고,
+       각각의 서브 요소들을 분리된 코어에서 병렬 처리시킨다.
+   - 예를 들어 쿼드 코어 CPU일 경우 4개의 서브 요소들로 나누고,
+       4개의 스레드가 각각의 서브 요소들을 병렬 처리
+   - 병렬 스트림은 포크조인 프레임워크를 이용
+       (개발자가 직접 포크조인 프레임워크를 쓰는게 아니라 
+        내부적으로 포크조인 프레임워크를 이용해서 병렬적으로 처리하는 것)
+
+  · 포크조인 프레임워크
+   - 포크조인 프레임워크 동작 방식
+    · 포크 단계 : 대용량 데이터를 서브 데이터로 반복적으로 분리
+	        서브 데이터를 멀티 코어에서 병렬로 처리
+    · 조인 단계 : 서브 결과를 결합해서 최종 결과를 만들어 낸다.
+   - 포크조인 프레임워크는 내부적으로 스레드를 포크조인풀에서 관리한다.
+   - 포크조인풀
+    · 각각의 코어에서 서브 요소를 처리하는 것은 개별 스레드가 해야하므로 스레드 관리가 필요
+    · ExecutorService의 구현 객체인 ForkJoinPoll을 사용
+    · 4개의 코어를 가진 CPU일 경우 4개의 스레드를 만들어서 사용
+
+  · 병렬 스트림 생성
+   1) Collection으로 parallelStream() 호출
+     - 컬렉션으로부터 병렬 스트림을 바로 리턴
+   2) Stream으로 parallel()을 호출
+     - 순차 처리 스트림을 병렬 스트림으로 변환해서 리턴
+
+  · 병렬 스트림의 예
+   - 사용자 정의 컨테이너에 수집하기(순차 처리 스트림)
+     MaleStudent maleStudent = totalList.stream()
+     .filter(s->s.getSex()==Student.Sex.MALE)
+     .collect(MaleStudent::new, MaleStudent::accumulate, MaleStudent::combine);
+       - MaleStudent 객체는 하나만 생성
+       - 남학생일 경우 accumulate()가 호출되어 MaleStudent 객체 내부에 계속 누적
+       - combine()은 전혀 호출되지 않음(싱글 스레드라서)
+   
+   - 병렬 스트림으로 수정
+     MaleStudent maleStudent = totalList.parallelStream()
+     .filter(s->s.getSex()==Student.Sex.MALE)
+     .collect(MaleStudent::new, MaleStudent::accumulate, MaleStudent::combine);
+       - 코어의 개수 만큼 전체 요소는 서브 요소로 나뉘어지고,
+          해당 개수 만큼 스레드가 생성
+       - 각 스레드는 서브 요소를 수집해야하므로 4개의 MaleStudent 객체를 생성하기 위해
+          collect()의 첫번째 메소드 참조인 MaleStudent::new를 4번 실행
+       - 각 스레드는 MaleStudent 객체에 남학생 요소를 수집하기 위해
+          collect()의 두번째 메소드 참조인 MaleStudent::accumulate를 매번 실행
+       - 수집 완료된 MaleStudent는 (코어개수-1)번의 결합으로 최종 수집된 MaleStudent로 만들어짐
+          따라서 collect()의 세번째 메소드 참조인 MaleStudent::combine이 (코어개수-1)번 실행
+
+  · 병렬 처리 성능
+   - 병렬 처리는 항상 빠르다?
+    · 스트림 병렬 처리가 스트림 순차 처리보다 항상 실행 성능이 좋다고 판단하면 안된다.
+   - 병렬 처리에 영향을 미치는 3가지 요인
+    · 요소의 수와 요소당 처리 시간
+     - 컬렉션에 요소의 수가 적고 요소당 처리 시간이 짧으면 순차 처리가 더 빠를 수 있다.
+        (병렬 처리는 스레드풀 생성, 스레드 생성이라는 추가적인 비용 발생)
+    · 스트림 소스의 종류
+     - ArrayList, 배열은 랜덤 액세스를 지원하기 때문에 포크 단계에서 쉽게 요소를
+       분리할 수 있어서 병렬 처리 시간이 절약된다.(index로 관리하기 때문)
+     - HashSet, TreeSet은 요소를 분리하기가 쉽지 않고, (index로 관리하지 않아서)
+        LinkedList는 랜덤 액세스를 지원하지 않아 링크를 따라가야 하므로 요소를 분리하기 쉽지 않음
+        BufferedReader.lines()은 전체 요소의 수를 알기 어렵기 때문에
+        포크 단계에서 부분 요소로 나누기 어렵다
+        따라서 이들 소스들은 ArrayList, 배열보다는 상대적으로 병렬 처리가 늦다.  
+    · 코어의 수
+     - 싱글 코어 CPU일 경우에는 순차 처리가 빠르다.
+        병렬 처리를 할 경우 스레드의 수만 증가하고 번갈아 가면서 스케줄링을 해야하므로
+        좋지 못한 결과를 준다.
+        코어의 수와 병렬 작업 처리 속도는 비례한다.
+
+
+
+※ 메소드에 To가 있으면 리턴타입은 To뒤에 나오는 타입
+    ex) toString = 리턴타입 String
+         flatMapToDouble = 리턴타입 Double

@@ -1,0 +1,130 @@
+람다식 복습
+ - 인터페이스 변수 = ( ) -> { };
+ - 추상메소드가 1개인 인터페이스만 람다식으로 만들 수 있다.
+    (함수적 인터페이스)
+
+--------------------------------------------------------------------
+람다식
+클래스 멤버와 로컬 변수 사용
+ - 로컬 변수 사용
+   · 람다식은 익명 구현 객체로 결과물이 나와서  
+     익명 구현 객체의 문법을 그대로 따른다.
+   · 람다식이 메소드 안에서 사용된 경우
+     바깥 클래스의 필드나 메소드는 제한없이 사용 가능,
+     메소드의 매개 변수 또는 로컬 변수는 읽기(사용)만 가능 
+     쓰기(수정, 삭제, 저장)은 불가능
+     (로컬 중첩 클래스처럼 final이 붙는다.)
+ - this
+   · 외부클래스와 내부클래스에 동일한 이름의 변수가 있을 때
+     내부클래스에서 변수를 호출시
+     외부클래스.this.변수를 하면 외부클래스의 변수가 호출
+     변수 혹은 this.변수를 하면 내부클래스의 변수가 호출
+     
+람다식을 이용한 API
+ - java.lang.Runnable
+		Runnable runnable = () -> {//Runnable도 함수적 인터페이스
+			for (int i = 0; i < 10; i++) {
+				System.out.println(i);
+			}
+		};
+		Thread t = new Thread(runnable);
+		t.start();
+		
+		Thread t2 = new Thread(new Runnable() {//익명 객체 생성
+			@Override
+			public void run() {
+				for (int i = 0; i < 10; i++) {
+					System.out.println(i);
+				}				
+			}
+		});
+		
+		Thread t1 = new Thread(()-> {//람다식으로 익명 객체 생성
+			for (int i = 0; i < 10; i++) {//Thread의 생성자를 보면 매개변수가 Runnable 타입의 target이란 변수로 받고 있어서
+				System.out.println(i);//따로 Runnable이라고 명시하지 않아도 Runnable의 람다식이 되는 것
+			}
+		});
+		t1.start();
+
+ - java.util.function : 함수적 인터페이스가 모여있는 패키지
+
+
+들어온게 없는데 나가는 것(return 있음)
+ - Supplier<T>
+   · 매개변수가 없지만 T타입의 리턴이 있어야 함
+ - IntSupplier
+   · int getAsInt() : return이 int타입인 메소드
+
+Supplier<T>에서 T에 타입을 Integer나 Boolean이나
+ Double를 주면 리턴타입도 T랑 같은 것 같은데
+IntSupplier나 DoubleSupplier를 사용하는 이유가 따로 있는지 궁금해요!
+답변 : T에 타입 넣기 귀찮아서 그냥 그 타입으로 만들어놓음
+         Supplier만 써도 상관없음
+
+
+
+들어오는데 못나가는 것(return 없음)
+ - Consumer<T>
+   · accept(T t) : T를 받고 리턴이 없다.
+                     (안에서 소비를 해야함 ex) syso(t))
+ - BiConsumer<T,U>
+   · accept(T t, U u) : T와 U를 받고 리턴이 없다.
+		   (안에서 소비를 해야함)
+ - ObjIntConsumer<T>
+   · accept(T t, int value) : T와 int를 받고 리턴이 없다.
+ - DoubleConsumer
+   · accept(double value) : value를 받고 리턴이 없다.
+
+들어온게 나가는 것(return 있음)
+ - Function<T,R> : 들어가는건 T 나오는건 R
+
+f.apply(student); ← 이걸 풀어서 쓰면			
+String apply(Student student){
+   return student.getName();
+}이런 구조가 되는 것
+
+f.applyAsInt(student); 도 마찬가지로
+int tif(Student s) {
+   return s.getEng();
+}이런 구조
+
+ - BiFunction<T,U,R>
+   · 받는 제네릭 타입이 3개
+   · T랑 U를 받아서 R을 리턴
+
+ - IntToDoubleFunction
+   · Int가 들어가면 Double이 나온다.
+
+ - Operator
+   · 제네릭을 받아서 연산해서 출력
+   · OperatorEx 클래스 보고 코드 흐름을 파악하기
+
+ - Predicate<T> : test라는 메소드명을 쓰고 T를 넣으면 boolean 타입으로 나온다.
+   · T를 넣으면 boolean이 리턴
+ - BiPredicate<T,U>
+   · T와 U를 비교해서 boolean 리턴
+
+※ 매핑 : 형태를 바꿔주는 것
+
+람다식을 사용할 때 함수적 인터페이스가 가진 메소드의 매개변수를 확인하고 쓰기
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

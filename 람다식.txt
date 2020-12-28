@@ -1,0 +1,127 @@
+람다식
+ - 익명함수를 생성하기 위한 식
+ - 긴 코드를 간결하게 만든다.
+ - 형태는 매개 변수를 가진 코드 블록이지만,
+    런타임시 익명 구현 객체를 생성
+   · 람다식 --> 매개 변수를 가진 코드 블록 --> 익명 구현 객체
+     ※ 매개 변수를 가진 코드 블록 
+         = 인터페이스에 정의된 추상 메소드의 매개 변수( ), 코드 블록{ }
+	       
+ - 인터페이스에 추상 메소드가 1개만 있을 경우 사용 가능
+   · 람다식이 될 수 있는 인터페이스를 함수적 인터페이스라고 함
+     ※ 함수적 인터페이스 : 추상 메소드가 하나만 선언된 인터페이스
+ - @FunctionalInterface : "인터페이스에 추상 메소드가 1개다."
+   · 만약 @FunctionalInterface를 붙이고 추상 메소드를 만들지 않거나
+     2개 이상 만들면 오류 발생
+   · 어노테이션이 없더라도 하나의 추상 메소드만 있다면 모두 함수적 인터페이스
+     (두 개 이상의 추상 메소드를 선언하는 것을 방지하고 싶을 때 사용)
+ - 자바는 메소드가 항상 클래스의 멤버로 선언되야 함
+   · 람다식은 단순히 메소드를 선언하는 것이 아니라
+     이 메소드를 가지고 있는 객체를 생성하는 것
+ - 람다식은 인터페이스 변수에 대입된다.
+   · 람다식은 인터페이스의 익명 구현 객체를 생성
+   · 람다식이 대입될 인터페이스를 람다식의 타겟 타입이라고 함
+ - 문법
+   · 기본 구조
+     (타입 매개변수, ...) -> {실행문, ...};
+     - 매개 변수의 타입 생략 가능
+     - 매개 변수가 하나면 ( ) 생략 가능
+        단, 매개 변수가 없으면 ( )를 반드시 사용
+     - 실행문이 하나면 { } 생략 가능
+     - { }에서 리턴값이 있다면 return문 사용
+        ex) (x, y) -> { return x+y; };
+        만약 { }에 return문만 있다면 생략 가능
+        ex) (x, y) -> x+y;
+ - 클래스 멤버와 로컬 변수 사용
+   · 로컬 변수 사용
+     - 람다식은 익명 구현 객체로 결과물이 나와서 
+       익명 구현 객체의 문법을 그대로 따름
+     - 람다식이 메소드 안에서 사용된 경우
+       바깥 클래스의 필드나 메소드는 제한 없이 사용 가능하지만
+       메소드의 매개 변수 또는 로컬 변수는 읽기(사용)만 가능하고,
+       쓰기(수정, 삭제, 저장)은 불가능함
+       (= 로컬 중첩클래스처럼 final이 붙는다.)
+
+   · this
+     - 외부 클래스와 내부 클래스에 동일한 이름의 변수가 있을 때
+       외부 클래스의 변수를 호출하려면 외부클래스.this.변수
+       내부 클래스의 변수를 호출하려면 변수 or this.변수
+
+ - java.lang.Runnable
+   · Runnable도 run() 1개만 가지고 있는 함수적 인터페이스
+   · Thread t = new Thread(()->{ });
+     이 코드의 경우 Thread의 생성자 중 Thread(Runnable target)
+     생성자를 사용했기 때문에 따로 Runnable을 명시하지 않아도
+     Runnable의 람다식을 만들 수 있는 것
+
+ - Consumer
+   · 들어오는데 나갈 순 없다.(return이 없음)
+   · accept()를 가지고 있음
+     - 매개값을 소비하는 역할
+   · 종류
+     Consumer<T> - accept(T t)
+     BiConsumer<T,U> - accept(T t, U u)
+     DoubleConsumer - accept(double value)
+     IntConsumer - accept(int value)
+     LongConsumer - accept(long value)
+     ObjDoubleConsumer - accept(T t, double value)
+     ObjIntConsumer - accept(T t, int value)
+     ObjLongConsumer - accept(T t, long value)
+
+ - Supplier
+   · 들어오는게 없는데 나간다.(return 있음)
+   · get()을 가지고 있음
+     - 실행 후 호출한 곳으로 데이터를 리턴하는 역할
+   · 종류
+     Supplier<T> - T get()
+     BooleanSupplier - boolean getAsBoolean()
+     DoubleSupplier - double getAsDouble()
+     IntSupplier - int getAsInt()
+     LongSupplier - long getAsLong()
+
+ - Function
+   · 들어온게 나간다.(return 있음)
+   · apply()를 가지고 있음
+     - 매개값을 리턴값으로 매핑(타입 변환)하는 역할
+   · 종류
+     Function<T,R> - R apply(T t)
+     BiFunction<T,U,R> - R apply(T t, U u)
+     DoubleFunction<R> - R apply(double value)
+     IntFunction<R> - R apply(int value)
+     IntToDoubleFunction - double applyAsDouble(int value)
+     IntToLongFunction - long applyAsLong(int value)
+     LongToDoubleFunction - double applyAsDouble(long value)
+     LongToIntFunction - int applyAsInt(long value)
+     ToDoubleBiFunction<T,U> - double applyAsDouble(T t, U u)
+     ToDoubleFunction<T> - double applyAsDouble(T t)
+     ToIntBiFunction<T,U> - int applyAsInt(T t, U u)
+     ToIntFunction<T> - int applyAsInt(T t)
+     ToLongBiFunction<T,U> - long applyAsLong(T t, U u)
+     ToLongFunction<T> - long applyAsLong(T t)
+
+ - Operator
+   · Function과 동일하지만, 
+     매개값을 리턴값으로 매핑하는 역할보다
+     매개값을 이용해서 연산을 수행한 후 
+     동일한 타입으로 리턴값을 제공하는 역할
+     (인자(매개변수)와 리턴타입이 같아야 한다.)
+   · apply()를 가지고 있음
+   · 종류
+     BinaryOperator<T> - BiFunction<T,U,R>의 하위 인터페이스
+     UnaryOperator<T> - Function<T,T>의 하위 인터페이스
+     DoubleBinaryOperator - double applyAsDouble(double, double)
+     DoubleUnaryOperator - double applyAsDouble(double)
+     IntBinaryOperator - int applyAsInt(int, int)
+     IntUnaryOperator - int applyAsInt(int)
+     LongBinaryOperator - long applyAsLong(long, long)
+     LongUnaryOperator - long applyAsLong(long)
+
+ - Predicate
+   · test()는 매개변수와 boolean 리턴값을 가지고 있음
+     - 매개값을 조사해서 true/false를 리턴하는 역할
+   · 종류
+     Predicate<T> - boolean test(T t)
+     BiPredicate<T,U> - boolean test(T t, U u)
+     DoublePredicate - boolean test(double value)
+     IntPredicate - boolean test(int value)
+     LongPredicate - boolean test(long value)

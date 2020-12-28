@@ -1,0 +1,104 @@
+Daemon Thread
+ - 주 스레드의 작업을 돕는 보조 스레드
+ - 주 스레드가 종료되면 데몬 스레드는 자동으로 강제 종료
+    = 데몬 스레드의 역할은 주 스레드를 보조하는 것인데
+       주 스레드가 없으면 존재 의미가 사라지기 때문에
+       이 점을 제외하면 일반 스레드와 크게 다르지 않음
+ - 데몬 스레드는 일반 스레드와 작성 방법과 실행 방법이 같지만
+    스레드 생성 후 실행하기 전에 setDaemon(true)를 호출하면 된다.
+    단, start()를 호출하고 setDaemon(true)을 하면 IllegalThreadStateException 발생
+ - isDaemon()
+   · 현재 스레드가 데몬 스레드인지 ture/false로 리턴
+
+Thread 그룹
+ - 관련된 스레드를 묶어서 관리할 목적
+ - system Thread Group
+   · JVM이 실행되면 만들어짐
+   · JVM 운영에 필요한 스레드들을 생성해서 system Thread 그룹에 포함
+ - main Thread Group
+   · 메인 스레드를 가지고 있다.
+ - 스레드는 반드시 하나의 스레드 그룹에 포함
+    (명시적으로 그룹에 포함시키지 않으면 
+     기본적으로 자신을 생성한 스레드와 같은 스레드 그룹에 속한다.
+     보통 main 스레드가 생성함)
+ - 현재 스레드가 속한 그룹 이름 얻기
+   · ThreadGroup group = Thread.currentThread().getThreadGroup();
+     String groupName = group.getName();
+ - getAllStackTraces()
+   · 프로세스 내에서 실행하는 모든 스레드의 정보를 Map 타입으로 리턴
+ - 스레드 그룹 생성
+   · ThreadGroup tg = new ThreadGroup(String name);
+     - 현재 스레드가 속한 그룹의 하위 그룹으로 생성
+        ex) main 스레드가 ThreadGroup(String name)으로 새 그룹을 생성하면
+             main 스레드 그룹의 하위 그룹이 된다.
+   · ThreadGroup tg = new ThreadGroup(ThreadGroup parent, String name);
+     - 부모 스레드가 속한 그룹의 하위 그룹으로 생성
+ - 스레드 그룹에 포함시키기
+   · Thread 객체를 생성할 때 생성자에 매개값으로 스레드 그룹을 지정
+     - Thread t = new Thread(ThreadGroup group, Runnable target);
+     - Thread t = new Thread(ThreadGroup group, Runnable target, String name);
+     - Thread t = new Thread(ThreadGroup group, Runnable target, String name, long stackSize);
+     - Thread t = new Thread(ThreadGroup group, String name);
+     - Runnable target = Runnable의 구현객체
+       String name = 스레드의 이름
+       long stackSize는 JVM이 스레드에 할당할 stack 크기
+ - 그룹을 통해 묶은 스레드는 메소드로 한번에 통제할 수 있다.
+   · interrupt() : 한꺼번에 정지
+                    단, 소속된 스레드의 interrupt()만 호출하고
+	        예외처리는 하지 않아서 개별적으로 예외처리를 해야함
+   · setDaemon(boolean) : 데몬 그룹으로 설정
+
+Collection Framework
+ - Collection : 객체를 수집해서 저장하는 역할
+ - Framework : 사용 방법을 미리 정해놓은 라이브러리
+ - 다수의 객체를 저장하고 필요할 때마다 꺼내서 사용하는 경우
+    가장 간단한 방법은 배열이지만 배열의 단점때문에 컬렉션을 사용
+    ※ 배열의 단점 : 생성 시 저장할 수 있는 객체수가 결정
+		 객체를 삭제하면 해당 인덱스가 비어있다.
+ - 주요 인터페이스 : List, Set, Map
+   · List : ArrayList, Vector, LinkedList
+	순서를 유지하고 저장
+	중복 저장 가능
+   · Set : HashSet, TreeSet
+	순서를 유지하지 않고 저장
+	중복 저장 불가능
+   ※ List와 Set은 공통점이 많아서 공통된 메소드들만 모아
+      Collection 인터페이스로 정의
+      = List와 Set의 부모 인터페이스는 Collection
+   · Map : HashMap
+	 Hashtable
+	 TreeMap
+	 Properties
+	 키와 값이 한 쌍으로 저장
+	 키는 중복 저장 불가능
+
+ - List
+   · 객체를 일렬로 늘어놓은 구조.
+   · 객체를 index로 관리하기 때문에 객체를 저장하면 자동으로 index가 부여
+     index로 객체를 검색, 삭제할 수 있다.
+   · 객체 자체를 저장하는 것이 아니라 객체의 주소를 저장
+     동일한 객체를 중복 저장할 때 동일한 주소를 저장하는 것
+     null을 저장하면 해당 index는 객체를 참조하지 않는다.
+   · ArrayList
+     - 객체를 추가하면 객체가 인덱스로 관리
+     - 저장 용량이 초과되면 자동으로 저장 용량이 늘어난다.
+        처음부터 용량을 크게 잡고 싶다면 생성자의 매개값에 용량을 적는다.
+     - 구조
+       · List<E> 변수 = new ArrayList<>();
+     - 모든 종류의 객체를 저장할 수는 있지만,
+        찾아올 때 원래 타입으로 변환해야 하므로 실행 성능에 나쁜 영향
+        = 왠만하면 같은 종류의 객체만 저장
+     - 객체를 추가하면 인덱스 0부터 차례대로 저장되고,
+        삭제하거나 추가하면 해당 인덱스부터 1칸씩 전체적으로 밀리거나 당겨진다.★
+        따라서 빈번히 삽입과 삭제가 일어나면 ArrayList보다는 LinkedList를 사용
+     - 검색이나 객체를 추가하는 경우 ArrayList가 좋다.
+     - add() : 매개값을 ArrayList에 추가한다.
+	     매개값으로 객체나 기본형을 준다.
+	     add(index, 객체)하면 index번째 자리에 객체를 넣고 
+	     나머지는 한칸씩 밀리는데, 권장하지 않는다.
+     - size() : ArrayList의 전체 크기
+     - set(index, 객체) : index번째 값을 객체로 바꾸기
+     - get(index) : index에 있는 값을 리턴
+     - indexOf("") : ""의 index를 리턴, 없으면 -1 리턴
+	           중복된 값이 있으면 처음에 입력한 값을 리턴
+     - lastIndexOf("") : indexOf()와 같지만 중복된 값이 있으면 마지막에 입력한 값을 리턴

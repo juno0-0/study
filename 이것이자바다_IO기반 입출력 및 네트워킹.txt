@@ -1,0 +1,711 @@
+IO(Input Output) 패키지 소개
+ - 자바에서는 데이터를 입출력하기 위해 java.io 패키지를 제공
+ - 주요 클래스
+   · File : 파일 시스템의 파일의 정보를 얻기위한 클래스
+            ※ 파일의 정보 : 파일의 이름, 경로, 크기, 속성 등
+		         ※ 속성 : 읽을 수 있는지? 실행할 수 있는지? 쓸 수 있는지? 
+   · Console : 콘솔로부터 문자를 입출력하기 위한 클래스
+   · InputStream / OutputStream : 바이트 단위 입출력을 위한 최상위 입출력 스트림 클래스
+			       바이트를 읽고 쓰기 위해 사용하는 클래스
+   · InputStream / OutputStream의 하위 클래스
+     - FileInputStream / FileOutputStream : 파일에 데이터를 저장하고 읽을 수 있음
+     - DataInputStream / DataOutputStream : 보조 스트림
+     - ObjectInputStream / ObjectOutputStream : 보조 스트림
+     - PrintStream : 보조 스트림
+     - BufferedInputStream / BufferedOutputStream : 보조 스트림
+   · Reader / Writer : 문자 단위 입출력을 위한 최상위 입출력 스트림 클래스
+		   문자를 읽고 쓰기 위해 사용하는 클래스
+   · Reader / Writer의 하위 클래스
+     - FileReader / FileWriter : 파일에서 문자를 읽거나 저장할 때 
+     - InputStreamReader / OutputStreamWriter : 바이트 스트림을 문자 스트림으로 변경해주는 역할
+     - PrintWriter : 문자를 출력
+     - BufferedReader / BufferedWriter : 성능향상을 위해 사용하는 보조 스트림
+
+입력 스트림과 출력 스트림
+ - 프로그램에 데이터가 들어갈 때는 입력 스트림을 이용해야 하고,
+    데이터가 나갈 때는 출력 스트림을 이용해야 함
+    (데이터가 들어오는 흐름과 나가는 흐름)
+    ex) A프로그램이 출력 스트림을 통해 데이터가 나가면(출발지 = 출력 스트림)
+         B는 입력 스트림을 통해 데이터를 받아야 한다.(도착지 = 입력 스트림)
+
+ - 바이트 기반 스트림과 문자 기반 스트림
+   · 스트림을 통해 주고 받는 데이터가 바이트면 바이트 기반 스트림
+     문자면 문자 기반 스트림
+   · 바이트 기반 스트림 : 그림, 멀티미디어, 문자 등 모든 종류의 데이터를 주고 받을 수 있음
+     - InputStream과 OutputStream은 바이트 기반 최상위 클래스
+     - InputStream, OutputStream이 붙으면 바이트 기반 스트림을 상속받았기 때문에
+        InputStream과 OutputStream의 기능을 사용 가능
+   · 문자 기반 스트림 : 문자만 주고 받을 수 있도록 특화되어 있음.
+     - Reader와 Writer는 바이트 기반 최상위 클래스
+     - Reader, Writer가 붙으면 문자 기반 스트림을 상속받았기 때문에
+        Reter와 Writer의 기능을 사용 가능
+   · ex) 파일에서 들어오고 나가는 데이터가 문자라면 FileReader, FileWriter
+          파일에서 들어오고 나가는 데이터가 문자 포함 모든 데이터라면 FileInputStream, FileOutputStream
+
+ - InputStream
+   · 바이트 기반 입력 스트림의 최상위 클래스로 추상 클래스임
+     (객체 생성 x, 필드의 다형성만 가능)
+   · InputStream을 상속받은 클래스가 사용할 수 있는 메소드★★★
+     - read() : 스트림으로부터 1바이트를 읽고 읽은 바이트를 리턴을 하는데
+                 리턴타입은 int → 4바이트
+                 read()가 읽은 1바이트가 4바이트 끝에 저장이 된다.(4바이트를 읽는게 아님)
+                 ex) □□□■ 
+                 데이터가 5개가 들어오면 5번을 실행해야 함
+                 데이터가 들어오면 읽고 int 타입으로 리턴하는 것을 반복 
+                 더 이상 읽을 데이터가 없으면 -1을 리턴★★★★★
+
+     - read(byte[] b) : 주어진 바이트 배열의 길이만큼 데이터를 읽어서
+		   그 데이터를 매개값으로 받은 배열에 저장하고 
+                           실제로 읽은 바이트 『수』를 리턴
+                           ex) 5바이트를 읽으면 5바이트를 배열에 저장하고 5를 리턴
+		   바이트 배열의 길이가 3일 때 데이터 5개가 들어온다면
+		   1,2,3번 데이터를 배열에 저장하고 3을 리턴(읽은 바이트 수)
+		   두번 째 읽을 경우 4,5번 데이터를 배열에 저장하고 비어있는 한칸에는
+		   그 전에 저장했던 3번 데이터가 남아있지만 실제로 읽은 2를 리턴
+
+     - read(byte[] b, int off, int len) : 데이터를 len개만큼 읽어서 바이트 배열에 off번째부터 저장
+			          실제로 읽은 바이트 『수』를 리턴
+			          read(byte[] b, 2, 3)의 경우
+			          바이트 배열의 길이가 8일 때 데이터 5개가 들어온다면
+			          len에 주어진 3만큼 데이터를 읽어서 off의 위치부터 저장한 뒤에 3을 리턴
+
+     ex) InputStream is = ...;				InputStream is = ...;
+          byte[] readBytes = new byte[100];		byte[] readBytes = new byte[100];
+          int readByteNo = is.read(readBytes);		int readByteNo = is.read(readBytes, 0, 100);
+          두 식은 같은 결과가 나온다. 
+           왜냐하면 좌측의 식은 바이트 배열의 길이인 100만큼 읽어서 리턴하는데
+           우측의 식은 100개만큼 읽어서 바이트 배열의 0번부터 저장하기 때문에 같은 원리
+           
+     - close() : InputStream을 닫을 때 반드시 사용
+                  InputStream을 더 이상 사용하지 않을 경우 반드시 호출
+	      InputStream에서 사용했던 시스템 자원을 풀어준다.
+	      (하지 않으면 열려있는 파일이 닫히지 않음)
+
+ - OutputStream
+   · 바이트 기반 출력 스트림의 최상위 클래스로 추상 클래스임
+     (객체 생성 x, 필드의 다형성만 가능)
+   · OutputStream을 상속받은 클래스가 사용할 수 있는 메소드★★★
+     - write(int b) : 주어진 1 바이트를 메모리 버퍼로 보냄
+		매개변수의 타입이 int라고 해서 4바이트를 출력하는 것이 아니라 
+                        끝에 있는 1 바이트만 메모리 버퍼로 보냄
+                        ex) □□□■ 
+                        한 바이트씩 출력하기 때문에 반복문을 사용해야 함
+     - write(byte[] b) : 바이트 배열 전체를 메모리 버퍼로 보냄
+		    바이트 배열을 전부 메모리 버퍼로 보내기 때문에 반복문이 필요 없음
+     - write(byte[] b, int off, int len) : 바이트 배열의 off번째부터 len개만큼만 메모리 버퍼로 보냄
+			           write(byte[] b, 1, 3)이면 byte[] b에서 1번부터 3개만 출력
+			           write(byte[] b)와 마찬가지로 반복문이 필요 없음
+     - flush() : write()를 하면 바로 출력되는게 아니라 메모리 버퍼에 쌓였다가
+	     메모리 버퍼가 꽉 차면 데이터를 출력하는데,
+	     데이터가 메모리 버퍼에 꽉 차지 않아도 강제적으로 메모리 버퍼에 있는 데이터를 출력
+	     write()를 쓰면 반드시 flush()를 사용한다.★★★★★
+     - close() : OutputStream을 닫을 때 반드시 사용
+                  OutputStream을 더 이상 사용하지 않을 경우 반드시 호출
+	      OutputStream에서 사용했던 시스템 자원을 풀어준다.
+	      (하지 않으면 열려있는 파일이 닫히지 않음)
+
+ - Reader
+   · 문자 기반 입력 스트림의 최상위 클래스로 추상 클래스임
+     (객체 생성 x, 필드의 다형성만 가능)
+   · Reader를 상속받은 클래스가 사용할 수 있는 메소드★★★
+     - read() : 한 번에 한 문자를 읽고 int를 리턴
+	     한 문자는 2바이트로 되어 있기 때문에
+	     int의 4바이트 중에서 끝 2바이트에 한 문자가 저장
+                 ex) □□■■ 
+	     문자가 2개 들어올 경우 2번 실행
+                 데이터가 들어오면 읽고 int 타입으로 리턴하는 것을 반복 
+                 더 이상 읽을 데이터가 없으면 -1을 리턴★★★★★
+     - read(char[] cbuf) : 읽은 문자들을 매개값으로 받은 배열에 저장하고 읽은 문자 『수』를 리턴
+		       char[]의 길이가 2일 경우 3개의 문자가 들어올 때 
+		       2개의 문자를 읽어서 0,1번에 저장하고 2를 리턴
+		       두 번째 읽을 경우 1개의 문자를 읽어서 0번에 저장하고 1을 리턴
+                               (1번에는 그 전에 읽은 문자가 남아 있는 상태)
+     - read(char[] cbuf, int off, int len) : 읽은 문자를 배열의 off번째부터 len개까지 배열에 저장하고 len을 리턴
+				 배열의 길이가 4이고 read(char[] cbuf, 1, 2)일 경우 
+				 문자 3개가 들어올 때 배열의 1번부터 2개를 저장하고 2를 리턴
+     - close() : Reader를 닫을 때 반드시 사용
+                  Reader를 더 이상 사용하지 않을 경우 반드시 호출
+	      Reader에서 사용했던 시스템 자원을 풀어준다.
+	      (하지 않으면 열려있는 파일이 닫히지 않음)
+
+ - Writer
+   · 문자 기반 출력 스트림의 최상위 클래스로 추상 클래스임
+     (객체 생성 x, 필드의 다형성만 가능)
+   · Writer를 상속받은 클래스가 사용할 수 있는 메소드★★★
+     - write(int c) : 매개값으로 int를 받아서 끝 2바이트에 있는 문자를 메모리 버퍼에 보냄
+                        한 문자씩 출력하기 때문에 반복문을 사용해야 함
+     - write(char[] cbuf) : 배열을 받아서 배열에 있는 모든 문자를 메모리 버퍼에 보냄
+		       배열을 전부 메모리 버퍼로 보내기 때문에 반복문이 필요 없음
+     - write(char[] cbuf, int off, int len) : 배열의 off번째부터 len개만큼 메모리 버퍼에 보냄
+				  writer.writer(cbuf, 1, 2)하면 문자 배열에서 1번부터 2개를 메모리 버퍼에 보냄
+     - write(String str) : 매개값으로 주어진 문자열을 전부 메모리 버퍼에 보냄
+     - write(String str, int off, int len) : 매개값으로 주어진 문자열에서 off번째부터 len개만큼 메모리 버퍼에 보냄
+     - flush() : write()를 하면 바로 출력되는게 아니라 메모리 버퍼에 쌓였다가
+	     메모리 버퍼가 꽉 차면 데이터를 출력하는데,
+	     데이터가 메모리 버퍼에 꽉 차지 않아도 강제적으로 메모리 버퍼에 있는 데이터를 출력
+	     write()를 쓰면 반드시 flush()를 사용한다.★★★★★
+     - close() : Writer를 닫을 때 반드시 사용
+                  Writer를 더 이상 사용하지 않을 경우 반드시 호출
+	      Writer에서 사용했던 시스템 자원을 풀어준다.
+	      (하지 않으면 열려있는 파일이 닫히지 않음)
+
+콘솔 입출력
+ - 콘솔(Console)
+   · 시스템을 사용하기 위해 키보드로 입력을 받고 화면으로 출력하는 소프트웨어
+   · Unix, Linux에서는 터미널을 제공
+     Windows 운영체제에서는 명령 프롬프트를 제공
+     이클립스에서는 Console 뷰를 제공
+
+ - System.in 필드
+   · InputStream 타입의 입력 스트림 InputStream 변수에 대입할 수 있다.
+     ex) InputStream is = System.in;
+          is.read();로 입력
+   · 읽은 byte는 키보드의 아스키 코드 (1을 입력해도 1이 아닌 1의 아스키코드 49가 리턴)
+     (문자로 읽으려면 (char)로 형변환)
+
+ - 키보드로부터 입력된 한글 읽기
+   · byte[] byteData = new byte[15];
+     int readByteNo = System.in.read(byteData);
+     //읽은바이트수     //실제로 읽은 바이트가 저장
+     ex) 키보드에서 Java Enter키 입력
+          byteData[0]=J, [1]=a, [2]=v, [3]=a, [4]=\r, [5]=\n이 저장
+			                 ※ Enter키 = \r + \n
+			 	                    (13)   (10)
+          readByteNo = 6(읽은 바이트 개수)
+          String strData = new String(byteData, 0, readByteNo-2);
+          배열의 0번째부터 readByteNo-2개만큼 문자열로 만든다.
+          (-2는 Enter(\r, \n))
+
+ - System.out 필드
+   · PrintStream 타입의 출력 스트림 PrintStream은 OutputStream의 하위 클래스라서 
+     System.out을 OutputStream으로 타입 변환 가능
+     ex) OutputStream os = System.out;
+   · 아스키 코드를 출력하면 콘솔에는 문자가 출력
+     ex) byte b = 97;
+          os.write(b);
+          os.flush();하면 문자 a가 출력
+   · 문자열을 출력하려면 바이트 배열을 얻어야 함
+     String name = "아이유";
+     byte[] nameBytes = name.getBytes();//문자열을 바이트 배열로 변환
+     os.write(nameBytes);
+     os.flush();
+   · System.out.println     ←       PrintStream ps = System.out;
+		     줄여서     ps.println();
+
+ - Console 클래스
+   · 자바 6부터 콘솔에 입력된 문자열을 쉽게 읽을 수 있도록 제공
+     ex) Console console = System.console();
+          이클립스에서는 null을 리턴하기 때문에 NullPointException 발생
+          반드시 명령 프롬프트에서 실행해야 함
+   · readLine() : 엔터키를 입력하기 전의 모든 문자열을 읽음
+   · readPassword() : 키보드 입력 문자를 콘솔에 보여주지 않고 문자열을 읽음
+
+ - Scanner 클래스
+   · Console 클래스의 단점 : 문자열은 읽을 수 있지만 기본 타입을 바로 읽을 수 없다.
+   · Scanner는 콘솔로부터 기본 타입의 값을 바로 읽을 수 있다.
+
+파일 입출력
+ - File 클래스
+   · 파일 시스템의 파일을 표현하는 클래스
+     - 파일 크기, 속성, 이름 등의 정보 제공
+     - 파일 생성 및 삭제 기능 제공
+     - 디렉토리를 생성 및 삭제하고 디렉토리에 존재하는 파일 리스트를 얻어내는 기능 제공
+   · 파일 객체 생성
+     File file = new File("파일 및 디렉토리의 경로");
+   · exists() : 파일 또는 디렉토리 존재 유무 확인
+   · createNewFile() : 새로운 파일을 생성
+   · mkdir() : 새로운 디렉토리를 생성
+   · mkdirs() : 경로상에 없는 모든 디렉토리를 생성
+                  (경로로 C:/Temp/dir/dir2를 줬는데
+                    dir과 dir2가 없으면 dir과 dir2를 생성해준다.
+	        mkdir()을 사용시 dir이 없는데 dir2를 만들라 하면 예외 발생
+	        디렉토리가 존재하는지 확실하지 않으면 mkdirs()를 사용)
+   · delete() : 파일 또는 디렉토리 삭제
+
+ - 파일 및 디렉토리의 정보를 리턴하는 메소드
+   · canExecute() : 실행할 수 있는지?
+   · canRead() : 읽을 수 있는지?
+   · canWrite() : 수정 및 저장할 수 있는지?
+   · getName() : 파일의 이름을 리턴
+   · getParent() : 부모 디렉토리를 String으로 리턴
+   · getParentFile() : 부모 디렉토리를 File 객체로 생성후 리턴
+   ※ C:/Temp/test.txt일 경우 C:/Temp가 부모의 디렉토리
+   · getPath() : 전체 경로를 리턴
+
+   ※ C:/Temp/test.txt일 경우 
+   · isDirectory() : C:/Temp로부터 객체가 만들어졌니?
+   · isFile() : isDirectory()와 반대, test.txt로부터 객체가 만들어졌니?
+   · isHidden() : 숨김 파일인지?
+   · lastModified() : 마지막 수정 시간을 리턴
+   · length() : 파일의 크기(길이x)★
+   · list() : 파일 객체가 디렉토리로부터 만들어졌을 때
+             디렉토리 안에 있는 파일 리스트 및 서브 디렉토리 리스트를 문자열 배열로 리턴
+   · listFiles() : 파일 객체가 디렉토리로부터 만들어졌을 때
+	      디렉토리 안에 있는 파일 리스트 및 서브 디렉토리 리스트를 파일 배열로 리턴
+   · list(FilenameFilter filter) : 디렉토리 안에 있는 파일 중 
+			 매개값으로 필터링한 결과를 문자열 배열로 리턴
+   · listFiles(FilenameFilter filter) : 디렉토리 안에 있는 파일 중
+			      매개값으로 필터링한 결과를 파일 배열로 리턴
+
+ - FileInputStream
+   · 파일로부터 바이트 단위로 읽어 들일 때 사용
+     - 모든 종류의 파일을 읽을 수 있다.
+   · 객체 생성
+     - FileInputStream fis = new FileInputStream("경로");
+     - File file = new File("경로");
+       FileInputStream fis = new FileInputStream(file);
+     - 객체가 생성될 때 파일과 직접 연결
+        (파일이 존재하지 않으면 FileNotFoundException이 발생하기 때문에
+         예외처리가 필요함)
+   · InputStream의 하위 클래스이므로 사용 방법이 InputStream과 동일
+
+ - FileOutputStream
+   · 파일에 바이트 단위로 데이터를 저장할 때 사용
+     - 모든 종류의 데이터를 파일로 저장할 수 있다.
+   · 객체 생성
+     - FileOutputStream fis = new FileOutputStream("경로");
+     - File file = new File("경로");
+       FileOutputStream fis = new FileOutputStream(file);
+     - 파일이 이미 존재하는 경우 데이터를 출력하면 파일을 덮어쓴다.
+     - 기존 내용 끝에 데이터를 추가할 경우
+       · FileOutputStream fis = new FileOutputStream("경로", true); 
+       · FileOutputStream fis = new FileOutputStream(file, true);
+   · OutputStream의 하위 클래스이므로 사용 방법이 OutputStream과 동일
+
+ - FileReader
+   · 문자 파일로부터 데이터를 읽어 들일 때 사용
+     - 문자 단위로 읽기 때문에 텍스트가 아니면 읽을 수 없다.
+     - 문자 파일을 읽는데 특화되어 있다.
+   · 객체 생성
+     - FileReader fr = new FileReader("경로");
+     - File file = new File("경로");
+        Filereader fr = new FileReader(file);
+     - 객체가 생성될 때 파일과 직접 연결
+        (파일이 존재하지 않으면 FileNotFoundException이 발생하기 때문에
+         예외처리가 필요함)
+   · Reader의 하위 클래스이므로 사용 방법이 Reader과 동일
+
+ - FileWriter
+   · 문자 파일에 문자 데이터를 저장할 때 사용
+     - 문자 데이터를 파일에 저장하는데 특화되어 있다.
+   · 객체 생성
+     - FileWriter fw = new FileWriter("경로");
+     - File file = new File("경로");
+        FileWriter fw = new FileWriter(file);
+   · 파일이 이미 존재할 경우 데이터를 출력하게 되면 파일을 덮어쓴다.
+   · 기존 파일 내용 끝에 데이터를 추가할 경우
+     - FileWriter fw = new FileWriter("경로", true);
+     - FilwWriter fw = new FileWriter(file, true);
+   · Writer의 하위 클래스이므로 사용 방법이 Writer과 동일
+
+보조 스트림
+ - 다른 스트림과 연결이 되어 여러가지 편리한 기능을 제공해주는 스트림
+   · 문자 변환, 입출력 성능 향상, 기본 데이터 타입 입출력, 객체 입출력 등의 기능 제공
+   · 프로그램이 입력 스트림에서 바로 데이터를 받지 않고 보조 스트림을 통해 받거나,
+     프로그램이 출력 스트림으로 바로 데이터를 보내지 않고 보조 스트림을 통해 보내는 것
+
+ - 보조 스트림 생성
+   · 보조스트림 변수 = new 보조스트림(연결(입력or출력)스트림)
+     ex) InputStream is = System.in;//여기까지만 하면 바이트가 프로그램으로 보내짐
+          InputStreamReader reader = new InputStreamReader(is);//보조 스트림이 문자로 바꿔서 프로그램으로 보냄
+
+ - 보조 스트림 체인
+   · 보조 스트림에 또 다른 보조 스트림이 연결 가능
+     ex) 입력 스레드에게 데이터를 받은 뒤 보조 스트림1로 데이터를 문자로 바꾸고 
+          보조 스트림2로 입출력 성능 향상을 시킨다.
+
+ - 문자 변환 보조 스트림
+   · 바이트 기반 스트림을 문자 기반 스트림으로 변환
+   · 소스 스트림이 바이트 기반 스트림이지만 데이터가 문자일 경우 사용
+     - Reader와 Writer는 문자 단위로 입출력하기 때문에 바이트 기반 스트림보다 편리
+     - 문자셋의 종류를 지정할 수 있다.
+   · InputStreamReader
+     - 문자를 읽어올 때 바이트 -> 문자
+     - InputStream is = System.in;
+       Reader reader = new InputStreamReader(is);
+     - FileInputStream fis = new FileInputStream("경로");
+       Reader reader = new InputStreamReader(fis);
+   · OutputStreamWriter
+     - 문자를 출력할 때 문자 -> 바이트
+     - FileOutputStream fos = new FileOutputStream("경로");
+       Writer writer = OutputStreamWriter(fos);
+
+ - 성능 향상 보조 스트림
+   · 입출력 성능에 영향을 미치는 입출력 소스
+     - 하드 디스크 : 하드 디스크로 데이터를 입출력할 때 속도가 가장 느림
+                         프로그램의 속도가 아무리 빨라도 하드 디스크의 데이터를 입출력할 때
+		 하드 디스크의 속도에 맞춰서 프로그램이 데이터를 쓰고 읽어야 하기 때문에.
+     - 느린 네트워크 : 네트워크 통신 속도가 느리면 데이터를 빨리 보낼 수 없다.
+   · 버퍼를 이용한 해결
+     - 입출력 소스와 직접 작업하지 않고 버퍼와 작업함으로 실행 성능을 향상
+        ex) 프로그램이 하드 디스크에 직접 데이터를 전송하는게 아니라
+             중간에 메모리 버퍼를 두어서 버퍼에 데이터를 고속 전송,
+             메모리 버퍼는 데이터가 꽉차면 한꺼번에 하드 디스크로 데이터를 보냄(출력 횟수가 줄어듬)
+   · BufferedInputStream, BufferedReader
+     - 입력 버퍼를 제공하는 스트림
+     - 입력 소스에서 미리 버퍼에 데이터를 채워놓고,
+        프로그램에서 고속으로 읽는다.
+     - BufferedInputStream bis = new BufferedInputStream(바이트입력스트림);
+        BufferedReader br = new BufferedReader(문자입력스트림);
+     - BufferedReader는 주로 readLine()을 주로 사용
+       ※ readLine() : 입력한 Line 전체를 읽어주는 메소드
+   · BufferedOutputStream, BufferedWriter
+     - 프로그램에서 데이터를 버퍼에 고속으로 전송하고,
+        메모리 버퍼가 꽉 차면 자동으로 목적지에 데이터를 한번에 보낸다. 
+        (단, 데이터의 크기가 메모리 버퍼의 용량보다 작으면 꽉 차지 않아서
+         자동으로 목적지에 가지 않기 때문에 마지막에 flush()를 꼭 써준다.)
+     - BufferedOutputStream bos = new BufferedOutputStream(바이트출력스트림);
+       BufferedWriter bw = new BufferedWriter(문자출력스트림);
+
+ - 기본 타입 입출력 보조 스트림
+   · 바이트를 기본 타입, 기본 타입을 바이트로 바꿔준다.
+   · DataInputStream dis = new DataInputStream(바이트입력스트림);
+     DataOutputStream dos = new DataOutputStream(바이트출력스트림);
+   · writeUTF() : 파일에 매개값으로 받은 문자열을 저장
+
+ - 프린터 보조 스트림
+   · 프로그램에서 기본 타입이나 문자열을 출력할 때 줄바꿈을 자주 할 경우 
+     PrintStream이나 PrintWriter를 사용
+   · PrintStream ps = new PrintStream(바이트기반스트림);
+     PrintWriter pw = new PrintWriter(문자기반스트림);
+   · print() : 줄 바꿈없이 매개값을 출력
+   · println() : 매개값을 출력하고 줄 바꿈
+   · printf() : 형식화된 문자열을 출력할 때 사용
+	    ex) %[매개값의 순번][-,0][전체자릿수][.소수자릿수]변환문자
+	         []는 생략가능
+
+ - 객체 입출력 보조 스트림
+   · 객체를 파일 또는 네트워크로 입출력할 수 있는 기능 제공
+   · ObjectInputStream, ObjectOutputStream
+     - 객체를 네트워크에서 받아서 프로그램으로 보내거나,
+       프로그램에서 네트워크로 보낼 때,
+       ObjectInputStream, ObjectOutputStream을 사용하여
+       객체를 바이트 출력 스트림(직렬화), 바이트 입력 스트림(역직렬화)로 변환
+     - ObjectInputStream ois = new ObjectInputStream(바이트입력스트림);
+        ObjectOutputStream oos = new ObjectOutputStream(바이트출력스트림);
+        oos.writeObject(객체);//객체를 출력, 매개값으로 객체만 가능함
+        객체타입 변수 = (객체타입)ois.readObject();//객체를 읽기
+        저장할 때 순서와 읽을 때 순서는 같아야 한다
+        ex) Integer, Double, String 순으로 저장하면
+             Integer, Double, String 순으로 읽어야 함
+
+ - 직렬화가 가능한 클래스(Serializable)
+   · Serializable 인터페이스를 구현한 클래스만 직렬화할 수 있도록 제한
+   · 직렬화 규칙 : 생성자나 메소드는 직렬화 대상이 되지 않고
+	          객체가 가지고 있는 필드만 직렬화가 된다.★★★
+     - transient : 직렬화에서 제외시키고 싶은 필드에 사용하는 키워드
+	         패스워드같이 보안 정보가 직렬화 과정에서 제외되야 하는 경우 사용
+	         바이트화(직렬화)가 되지 않아서 역직렬화를 했을 시 기본값이 나온다
+     - static : 앞에서 말한 것처럼 직렬화는 객체가 가지고 있는 필드만 직렬화가 되는데
+	     static이 붙으면 객체가 가지고 있는 필드가 아니라 메소드 영역에 올라간 필드이기 때문에
+	     직렬화가 되지 않는다.
+   · serialVersionUID 필드
+     - 같은 클래스인지 다른 클래스인지 구별하기 위한 식별값
+     - 직렬화된 객체를 역직렬화할 때는 직렬화 했을 때와 같은 클래스를 사용(A를 출력했으면 읽을 때도 A를 읽음)
+     - 클래스의 이름이 같더라도 클래스의 내용이 변경된 경우 역직렬화는 실패
+     - 역직렬화할 때는 직렬화된 클래스의 serialVersionUID도 같이 바이트로 출력되서 
+        객체를 읽을 때 객체 안에 있는 serialVersionUID와 객체를 담을 클래스의 serialVersionUID가 다르면
+        다른 클래스로 인식해서 역직렬화가 되지 않는다.
+         · Serializable 인터페이스가 구현되면 컴파일시에 자동적으로 serialVersionUID 정적 필드가
+           추가되지만 재컴파일하면 serialVersionUID의 값이 달라져서 그 클래스는 재컴파일을 하면 안된다.
+         · 하지만 재컴파일을 해야하는 클래스인 경우 serialVersionUID를 명시적으로 선언한다.
+           ex) static final long serialVersionUID = 정수값;   
+
+   · writeObject()와 readObject() 메소드
+     - writeObject(ObjectOutputStream out), readObject(ObjectInputStream in)
+     - ObjectOutputStream과 ObjectInputStream의 메소드
+
+     - Serializable 인터페이스를 구현한 객체를 출력할 때 
+       출력하기 직전에 writeObject()가 실행되고 출력이 된다.
+       반대로 객체를 읽어들일 때 읽기 직전에 readObject()가 실행되고 읽기 시작
+
+     - 만약 출력하기 전이나 읽기 전에 실행해야 할 코드가 있다면
+       writeObject()나 readObject()를 재정의한다.
+       (사실 재정의라고 할 순 없지만 자동적으로 실행되는 콜백메소드라고 생각한다.)
+        ※ callback method : 시스템이 사용자에게 처리요청을 하는 것)
+       단, 접근제한자가 private이 아니면 자동 호출이 되지 않으므로 반드시 private을 붙이고,
+       추가하고 싶은 코드 작성 후 마지막에 out.defaultWriteObject()나 in.defaultReadObject()를 붙인다.
+        · out.defaultWriteObject() : writeObject()의 매개값인 ObjectOutputStream에서 writeObject()를 호출하면 
+			      그 기능이 그대로 실행될 수 있도록 해준다.
+        · in.defaultReadObject() : readObject()의 매개값인 ObjectInputStream에서 readObject()를 호출하면
+			    그 기능이 그대로 실행될 수 있도록 해준다.
+
+     - 추가 직렬화 및 역직렬화가 필요한 경우
+        · 부모 클래스가 Serializable 인터페이스를 구현하고,
+           자식 클래스가 Serializable 인터페이스를 구현하지 않았을 때
+           자식 객체를 만들어서 writeObject()하면 모두 바이트화(직렬화)된다.
+           (부모가 인터페이스를 구현하였기 때문에)
+        · 부모 클래스가 Serializable 인터페이스를 구현하지 않고,
+          자식 클래스가 Serializable 인터페이스를 구현한 경우 부모 필드는 직렬화에서 제외
+          writeObject()에서 부모 필드 직렬화가 필요하고,
+          readObject()에서 부모 필드 역직렬화가 필요함 
+
+네트워크 기초
+ - 네트워크
+   · 여러대의 컴퓨터를 통신 회선으로 연결한 것
+     - 홈 네트워크 : 컴퓨터가 방마다 있고, 이들 컴퓨터를 유·무선등의 통신 회선으로 연결
+     - 지역 네트워크 : 회사, 건물, 특정 영역에 존재하는 컴퓨터를 통신 회선으로 연결
+     - 인터넷 : 지역 네트워크를 통신 회선으로 연결한 것 
+
+ - 서버와 클라이언트
+   · 서버 : 서비스를 제공하는 프로그램
+     - 웹서버, FTP서버, DBMS, 메신저 서버
+     - 클라이언트의 연결을 수락하고, 요청 내용을 처리한 후 응답을 보내는 역할
+   · 클라이언트 : 서비스를 받는 프로그램
+     - 웹브라우저, FTP클라이언트, 메신저
+     - 네트워크 데이터를 필요로하는 모든 애플리케이션이 해당(모바일앱 포함)
+   · 클라이언트가 서버에 연결 요청을 하면 서버가 연결을 수락하고,
+     연결이 수락되면 클라이언트는 어떤 작업을 서버에 처리 요청을 하고,
+     서버는 작업을 처리하고 그 결과를 응답으로 제공
+
+ - IP 주소와 포트(port)
+   · IP(Internet Protocol) 주소
+     - 네트워크상에서 컴퓨터를 식별하는 번호
+     - 네트워크 어댑터(LAN카드)마다 할당
+     - xxx.xxx.xxx.xxx 형식으로 표현
+       (xxx는 0~255 사이의 정수)
+   · 포트(Port)
+     - 같은 컴퓨터 내에서 프로그램을 식별하는 번호
+     - 클라이언트는 서버 연결 요청시 IP 주소와 Port를 같이 제공
+     - 0~65535 범위의 값을 가짐
+       · 0~1023 = 국제인터넷주소관리기구가 특정 애플리케이션용으로 미리 예약한 포트
+       · 1024~49151 = 회사에서 등록해서 사용할 수 있는 포트
+       · 49152~65535 = 운영체제가 부여하는 동적 포트 or 개인적인 목적으로 사용할 수 있는 포트
+
+ - InetAddress 클래스로 IP 주소 얻기
+   · java.net.InetAddress
+     - IP 주소를 표현한 클래스
+     - 로컬 컴퓨터의 IP 주소 뿐만 아니라 도메인 이름을 DNS에서 검색한 후 
+        IP 주소를 가져오는 기능을 제공
+        ※ 도메인 이름 : www.naver.com
+   · 로컬 컴퓨터에서 얻기
+     - InetAddress ia = InetAddress.getLocalHost();
+       로컬 컴퓨터의 IP 정보를 가지고 있는 InerAddress 객체를 얻을 수 있다.
+   · 도메인 이름으로 얻기
+     - InetAddress ia = InetAddress.getByName(String host);
+       InetAddress[] iaArr = InetAddress.getAllByName(String host);
+     - getByName()과 getAllByName()의 차이점
+       getByName() : 매개값으로 도메인 이름을 받아서 
+		  도메인 이름에 해당되는 IP 주소 하나를 가지고 와서 InetAddress를 리턴
+       getAllByName() : 매개값으로 도메인 이름을 받아서 
+ 	 	     도메인 이름으로 등록되있는 복수 개의 IP 주소를 가지고 와서 
+		     각각 InetAddress 객체를 만든 뒤 배열로 리턴
+		      (일반적으로 대중을 대상으로 서비스해주는 서버는 도메인 이름을 가지고 있고
+		        이 도메인 이름에는 2개 이상의 IP가 DNS에 등록)
+		        ※ DNS(Domain Name System) : 호스트의 도메인 이름을 호스트의 네트워크 주소로 
+						 바꾸거나 그 반대의 변환을 수행할 수 있도록 하기 위해 개발
+   · InetAddress로 IP 주소 얻기
+     - String ip = InetAddress.getHostAddress();
+       IP 주소를 문자열로 리턴해준다.
+
+TCP 네트워킹
+ - TCP(Transmission Control Protocol)
+   · 연결 지향적 프로토콜
+     처음 통신을 하기 위해서 연결부터 해야해서 시간이 소요된다.
+   · 연결을 하고 나면 통신 선로가 고정되기 때문에
+     선로에 따라 전송 속도가 빨라지거나 느려진다.
+   · 데이터를 정확하고 안정적으로 전달한다.
+     통신 선로를 통해 데이터를 전달하기 때문에 정확하고,
+     데이터를 순차적으로 보내고 받는 곳에서도 데이터를 순차적으로 받기 때문에 
+     데이터가 누락되는 일이 없다.
+
+ - ServerSocket과 Socket 용도
+   · ServerSocket 
+     - 연결 수락을 위해 사용하는 API
+     - 특정 포트 번호로 실행하는데 이 포트번호를 ServerSocket의 바인딩 포트라고 함
+        ※ binding Port : 서버가 실행할 때 연결이 되는 포트
+     - accept() : 특정 포트에서 실행이 된 이후에 클라이언트의 연결을 수락하기 위해
+	         대기 하는 메소드
+	         연결을 수락하는 역할
+	         클라이언트가 연결을 요청하면 accept()가 수락하고 
+	         클라이언트와 통신할 수 있는 Socket 객체를 만든다.
+   · Socket
+     - 통신을 하기 위한 API
+     - 클라이언트와 서버가 연결되면 소켓을 통해 데이터를 주고 받음
+       클라이언트의 소켓은 연결 요청도 함
+
+ - ServerSocket 생성과 연결 수락
+   · ServerSocket 생성과 포트 바인딩
+     - ServerSocket serverSocket = new ServerSocket(5001);
+        생성자의 매개값으로 포트 번호를 주면 해당 포트에 연결된 서버소켓 객체를 얻을 수 있다.
+     - ServerSocket serverSocket = new ServerSocket();
+       serverSocket.bind(new InetSocketAddress("IP 주소",5001));
+        서버소켓의 객체를 만들고 bind()를 이용해서 매개값으로 주어진 
+        InetSocketAddress 생성자를 통해 서버소켓을 만들 수 있다.(채우는?)
+        ※ InetSocketAddress의 첫번째 매개값은 IP 주소, 두번째 매개값은 바인딩할 포트 번호
+
+   · 연결 수락
+     - try{
+          Socket socket = serverSocket.accept();
+       } catch(Exception e) { }
+       서버소켓을 생성하고 accept()를 사용하면 
+       클라이언트가 연결을 요청할 때까지 대기하다가 요청이 들어오면 수락하고 Socket을 리턴
+       리턴받은 소켓으로 클라이언트의 정보를 얻거나 클라이언트와 데이터를 주고 받는다.
+     - 연결된 클라이언트 IP 주소 얻기
+       · InetSocketAddress socketAddress = (InetSocketAddress) socket.getRemoteSocketAddress(); 
+          - getRemoteSocketAddress() :  InetSocketAddress를 리턴
+       · InetSocketAddress의 메소드
+          - getHostName() : 클라이언트 IP 리턴
+          - getPort() : 클라이언트 포트 번호 리턴
+          - toString() : "IP:포트번호" 형태의 문자열 리턴
+
+   · 더 이상 ServerSocket을 사용하지 않을 땐 serverSocket.close()
+
+ - 클라이언트에서 필요한 Socket 생성과 연결 요청
+   · Socket 생성 및 연결 요청
+     - 방법 1
+       try{
+          Socket socket = new Socket("localhost", 5001);//방법1-1
+          //IP 주소에서 실행하고 있는 5001번 포트에 연결 요청함
+          Socket socket = new Socket(new InetSocketAddress("localhost", 5001));//방법1-2
+          //매개값으로 InetSocketAddress 인스턴스를 제공
+       } catch (UnknownHostException e) {
+          //IP 표기 방법이 잘못되었을 경우
+       } catch (IOException e) {
+          //해당 포트의 서버에 연결할 수 없는 경우(서버가 실행되지 않은 경우)
+       }
+     - 방법 2 
+       socket = new Socket();
+       socket.connect(new InetSocketAddress("localhost", 5001));
+       ※ connect() : 서버에 연결 요청하는 메소드★
+
+   · 서버와 연결을 끊을 경우 socket.close()
+
+ - Socket 객체로 데이터를 통신하는 방법
+   · 서버와 클라이언트가 연결되었다면 서버의 소켓과 클라이언트의 소켓은
+     서로 데이터를 주고받을 수 있다.
+   · 데이터를 받고 싶으면 Socket에서 InputStream을 받고,
+     데이터를 보내고 싶으면 Socket에서 OutputStream을 받는다.
+     (클라이언트와 서버 둘 다 해당된다.)
+
+   · 입출력 스트림 얻기
+     - InputStream is = socket.getInputStream();
+     - OutputStream os = socket.getOutputStream();
+
+   · 데이터 보내기
+     - String data = "보낼 데이터";
+        byte[] byteArr = data.getBytes("UTF-8");//한글을 3바이트로 표현
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write(byteArr);
+        outputStream.flush();
+
+   · 데이터 받기
+     - byte[] byteArr = new byte[100];
+        InputStream inputStream = socket.getInputStream();
+        int readByteCount = inputStream.read(byteArr);
+        //read()는 상대방이 데이터를 보내기 전까지 Blocking
+        String data = new String(byteArr, 0, readByteCount, "UTF-8");
+        //상대방이 데이터를 UTF-8번으로 보내면 받을 때도 UTF-8로 받는다.
+
+   · read()의 Blocking 해제
+     - 상대방이 데이터를 보내면 데이터를 읽고 실제 데이터는 
+        매개변수로 받은 배열에 넣고 읽은 바이트 수를 리턴
+     - 상대방이 정상적으로 Socket의 close()를 호출(연결을 끊음)한 경우 -1을 리턴
+     - 상대방이 비정상적으로 종료하면 IOException 발생
+
+ - 스레드 병렬 처리 방법
+   · 블로킹이 되는 메소드
+     - 블로킹이 되면 스레드는 멈춰있는 상태가 되서
+        다른 작업을 할 수 없다.
+     - ServerScoket의 accept() : 클라이언트의 연결 요청이 없으면 계속 블로킹 상태
+     - Socket생성자 or connect() : 클라이언트에서 사용하는 코드
+			       Socket생성자에 서버 연결 정보가 있다던지,
+			       connect()를 호출하면 서버와 연결하기 전까지 블로킹 상태
+     - Socket의 read() : 상대방이 데이터를 보내기 전까지 블로킹 상태
+        Socket의 write() : 데이터를 완전하게 목적지로 보내기 전까지 블로킹 상태
+
+   · 병렬 처리의 필요성
+     - 스레드가 블로킹되면 다른 작업을 수행하지 못함
+        ex) 입출력 할 동안 다른 클라이언트의 연결 요청을 수락 못함
+             입출력 할 동안 다른 클라이언트의 입출력을 하지 못함
+     - UI생성/변경 스레드가 블로킹이 되면 UI생성/변경을 할 수 없고, 이벤트 처리도 안된다.
+
+   · 스레드 병렬 처리
+     - 싱글 스레드 환경이라면, 클라이언트 2개를 동시에 처리할 수 없기 때문에
+        멀티 스레드 환경을 이용하는 것.
+     - 클라이언트가 연결을 요청하면 accept()가 요청을 수락하고 작업 스레드를 생성하여
+        해당 클라이언트의 처리 요청에 응답한다.
+     - 문제점
+       · 만약 수 천개의 클라이언트가 연결을 요청하면 
+         서버에서 수 천개의 스레드가 생성되기 때문에 
+         서버 성능이 급격히 저하되고 다운되는 경우가 발생
+     - 해결
+       ·  스레드를 제한된 갯수만큼 운영한다.
+          (클라이언트가 아무리 증가해도 작업 스레드의 갯수는 제한되어
+           서버의 성능이 저하되지 않음)
+
+   · 제한된 갯수의 스레드를 사용하려면 스레드풀을 사용
+     - ExecutorService를 이용해서 스레드풀을 만든다.
+     - 스레드풀 : 작업큐 안에 있는 작업들을 제한된 스레드가 하나씩 가지고 가서 처리하게 해줌
+	         ※ 작업큐 : 선입선출, FIFO
+                     클라이언트가 작업을 요청하면 작업을 생성,
+                     생성된 작업들은 작업큐에 들어가고,
+	         각 스레드는 작업큐에서 작업을 가져와 실행
+                     클라이언트가 아무리 늘어도 작업큐에 작업이 쌓일 뿐 스레드의 갯수는 고정
+	          단, 작업량이 많아서 클라이언트가 요청한 작업에 대한 응답을 늦게 받을 수 있음
+
+UDP 네트워킹
+ - UDP(User Datagram Protocol)
+   · 비연결 지향 프로토콜
+     - 연결 절차를 거치지 않고 발신자가 일방적으로 데이터를 발신하는 방식
+        연결 절차가 없기 때문에 TCP보다는 빠르다.
+   · 데이터 손실이 발생할 수 있음
+     - 일부 패킷은 잘못된 선로로 전송되어 잃어버릴 수 있다.
+       데이터 전달 신뢰성이 떨어짐
+   · 통신 선로가 고정적이지 않음
+     - 데이터 패킷들이 서로 다른 통신 선로를 통해 전달
+     - 먼저 보낸 패킷이 느린 선로를 통해 전송하면
+        나중에 보낸 패킷보다 늦게 도착할 수 있음
+
+ - DatagramSocket와 DatagramPacket
+   · DatagramSocket : 데이터를 발송하고 데이터를 받는 역할
+   · DatagramPacket : 전달되는 데이터를 표현하는 객체
+
+ - 발신자 구현 코드
+   · DatagramSocket datagramSocket = new DatagramSocket();//객체 생성
+
+     String data = "전달 데이터";
+     byte[] byteArr = data.getBytes("UTF-8");
+     DatagramPacket packet = new DatagramPacket(	이부분이 DatagramPacket
+	byteArr, byteArr.length,
+	new InetSocketAddress("localhost", 5001)
+     );
+
+     datagramSocket.send(packet);
+     //send() : 발신
+
+ - 수신자 구현 코드
+   · DatagramSocket datagramSocket = new DatagramSocket(5001);
+     //발신자의 포트와 수신자의 포트가 일치해야 한다.
+     DatagramPacket datagramPacket = new DatagramPacket(new byte[100], 100);
+     //다른 데이터를 저장할 DatagramPacket
+     //생성자의 매개값은 받은 데이터를 저장할 배열과 
+        받은 데이터를 저장할 배열의 길이
+     datagramSocket.receive(datagramPacket);
+     //receive() : 전달된 데이터가 매개값 안에 있는 배열에 저장된다.
+
+ - 발신자와 수신자가 더 이상 DatagramSocket을 사용하지 않으면 
+   datagramSocket.close();
+
+
+
+
+
+
+ ※ blocking : 대기 상태로 만든다.
+
+ ※ localhost : 127.0.0.1
+
+ ※ .dat : 바이트 데이터가 저장된 파일 확장자
+
+
+          
+
+   
+
+ 
+
+
+
+
+

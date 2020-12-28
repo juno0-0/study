@@ -1,0 +1,515 @@
+동등 객체★★★★★
+ - hashCode()와 equals()가 둘 다 true면 동등 객체
+   둘 중 하나라도 false면 다른 객체
+
+Deprecated
+ - 예전에는 사용했지만 지금은 더 좋은게 나왔으니 이거 말고 그걸 써라.
+
+Objects 클래스
+ - 연산을 수행하는 정적 메소드들로 구성된 Object의 유틸리티 클래스
+   (java.util에 있다.)
+ - Objects.메소드명()으로 사용
+ - compare(T a, T b, Comparator<T> c)★★★★★
+   · 두 객체를 비교자(Comparator)로 비교해서 int 값을 리턴
+   · java.util.Comparator<T>는 제네릭 인터페이스 타입으로
+     두 객체를 비교하는 compare(T a, T b)가 정의되어 있다.
+   · return (x < y) ? -1 : ((x == y) ? 0 : 1);
+     a가 b보다 작으면 음수, 같거나 둘 다 null이면 0, 크면 양수를 리턴
+   · 사용시 비교 할 비교자 클래스를 만들어야 한다.
+     static class XXComparator implements Comparator<>{
+         //정수를 비교할 경우
+         @Override
+         public int compare(XX x1, XX x2){
+             return Integer.compare(x1, x2);
+	 //x1과 x2의 위치를 바꾸면 내림차순
+         }
+         //문자열을 비교할 경우
+         @Override
+         public int compareTo(XX x1, XX x2){
+             return x1.name.compareTo(x2.name);
+         }
+     }	
+ - equals()와 deepEquals()
+   · Object의 equals()와 다른 점은 null을 비교할 수 있는 것
+     (Object의 equals()는 null과 비교하면 NullPointerException)
+   · deepEquals()는 배열의 항목 값까지 비교
+     (Arrays.deepEquals()와 같은 기능)
+
+ - hash()와 hashCode()
+   · hash(Object valus, ...)는 매개값들을 이용해서 hashCode를 생성
+     (매개값이 같으면 같은 hashCode를 갖는다.)
+   · hashCode(Object o)는 매개값의 hashCode를 리턴
+     (Object의 hashCode()와 다른 점은 매개값이 null이면 0을 리턴)
+
+ - isNull(), nonNull(), requireNonNull()
+   · isNull(Object o)는 매개값이 null이면 true, 아니면 false
+   · nonNull(Object o)는 매개값이 null이면 false, 아니면 true
+   · requireNonNull()은 세 가지로 오버로딩
+     1) requireNonNull(T obj)
+        - 매개값이 null이 아니면 매개값을 리턴
+           null이면 NullPointerException
+     2) requireNonNull(T obj, String msg)
+        - 위와 동일하지만 null이면 msg를 Exception에 보낸다.
+           (getMessager() 사용시 msg 호출)
+     3) requireNonNull(T obj, 람다식)
+        - 아직 안배움
+
+ - toString()
+   · 두 가지로 오버로딩
+     1) toString(Object o)
+        - 매개값이 null이면 null을 리턴
+           null이 아니면 toString()으로 얻은 값을 리턴
+     2) toString(Object o, String msg)
+        - 매개값이 null이면 msg를 리턴
+
+String 클래스
+ - String의 생성자 일부
+   · String(byte[] bytes)
+     - byte[]을 문자열로 만든다.
+   · String(byte[] bytes, String charsetName)
+     - byte[]을 문자열로 만드는데 어떤 특정한 문자셋으로
+       인코딩이 되어 있다면 그 문자셋을 가지고 다시 디코딩을 해서 문자열로 만든다.
+   · String(byte[] bytes, int offset, int length)
+     - byte[] 중 offset부터 length만큼만 문자열로 만든다.
+   · String(byte[] bytes, int offset, int length, String charsetName)
+     - byte[] 중 offset부터 length만큼만 charsetName으로 디코딩해서 문자열로 만든다.
+
+ - charAt(index)
+   · 매개값으로 주어진 index의 문자를 리턴
+
+ - indexOf("찾는문자열")
+   · 매개값으로 주어진 문자열이 시작되는 인덱스를 리턴
+   · 찾는문자열이 없으면 -1을 리턴
+
+ - equals()
+   · Object의 equals()는 주소를 비교하지만,
+     String이 재정의한 equals()는 값을 비교한다.
+   · String은 유일하게 같은 값을 가지고 있으면 같은 주소를 공유
+
+ - equalsIgnoreCase()
+   · 대소문자를 가리지 않고 비교
+
+ - getByte()
+   · 문자열을 byte[]로 리턴
+   · 시스템 파일로 만들거나, 네트워크로 문자열을 전송하거나,
+     문서를 암호화할 때 사용
+   · 파일의 내용을 읽거나, 네트워크를 통해 주고 받는 데이터는 보통 byte[]이다.
+   · Encoding : 사람의 언어 -> 컴퓨터의 언어
+                   (10진수 -> 2진수)
+   · Decoding : 컴퓨터의 언어 -> 사람의 언어
+                   (2진수 -> 10진수)
+   ※ Encoding한 문자셋으로 Decoding 해야 정확한 문자열을 얻는다.
+   · 특정 문자셋으로 인코딩된 문자열을 byte[]로 만들 경우
+     - EUC-KR을 사용했을 경우
+       getByte("EUC-KR");//한글은 2byte, 알파벳은 1byte
+       getByte("UTF-8");//한글은 3byte, 알파벳은 1byte
+       잘못된 문자셋을 매개값으로 줄 경우 UnsupportedEncodingException 발생
+
+ - replace(char oldChar, char newChar)
+   · oldChar에 '원래 문자', newChar에 '바꾸고 싶은 문자'
+   · 문자열도 가능하다.
+
+ - replaceAll(String oldStr, String newStr)
+   · oldStr에 "원래 문자열", newStr에 "바꾸고 싶은 문자열"
+ ※replace()와 replaceAll()의 차이
+   · replaceAll()은 정규식 표현으로 인식
+     replace()는 문자열 그대로 인식
+
+ - substring()
+   · substring(index)는 index부터 끝까지 출력
+   · substring(index1, index2)는 index1부터 index2 전까지 출력
+
+ - toLowerCase(), toUpperCase()
+   · 문자열을 모두 소문자, 대문자로 바꾼 값을 리턴
+   · equalsIgnoreCase()와 같이 사용하는 편이다.
+
+ - trim()
+   · 앞뒤 공백을 제거한다.
+     (글씨 중간에 띄어쓰기는 지워지지 않는다.)
+   · 원래 문자열의 공백이 제거되는 것은 아니다.
+
+ - valueOf()
+   · 기본형의 값을 문자열로 변환한다.
+
+System 클래스
+ - 운영체제의 도움을 받는 클래스
+    (주도권이 JVM이 아니라 운영체제에게 있다.
+     = JVM이 운영체제에게 부탁하는 입장)
+ - java.lang에 있는 클래스
+ - 필드 : in, out, err
+   · in = 키보드입력, 콘솔입력
+   · out = 키보드출력, 콘솔출력
+   · err = 모니터에러, 콘솔에러
+ - getProperty()
+   · JVM이 시작할 때 자동 설정되는 시스템의 속성값을 읽어온다.
+   · Key와 Value로 구성되어 있다.
+   · getProperties().keySet()을 하면 key만으로 구성된 Set을 얻을 수 있다.
+ - gc()
+   · JVM에게 가능하면 빨리 힙영역을 치워달라고 요청하는 것
+     (바로 치워주는건 아님)
+ - currentTimeMillis()
+   · 현재 시간을 밀리초(1/1000) 단위의 long 값으로 리턴
+ - nanoTime()
+   · 현재 시간을 나노초(1/10^9) 단위의 long 값으로 리턴
+
+Class 클래스
+ - 클래스와 인터페이스의 메타 데이터를 관리하는 클래스
+    ※ 메타 데이터 : 클래스의 이름, 생성자 정보, 필드 정보, 메소드 정보
+ - 다른 클래스에 대한 정보를 보여주는게 목적
+ - getClass()
+   · 객체.getClass()로 사용
+   · getClass() 앞에 있는 객체의 클래스 정보를 보여준다.
+ - getName()
+   · 패키지명.클래스명을 문자열로 리턴
+ - getSimpleName()
+   · 클래스명을 문자열로 리턴
+ - getPackage.getName()
+   · 클래스가 소속되어 있는 패키지명을 문자열로 리턴
+
+StringTokenizer 클래스
+ - 문자열이 특정구분자(& , - 등)로 연결되어 있을 경우
+    구분자를 기준으로 분리하기 위해 String 클래스의 split()을 사용하거나,
+    StringTokenizer 클래스를 사용한다.
+    ※ Token : 혼합된 문자열에서 구분자에 의해 구분된 것을 분리해서 나온 문자
+
+ - split()
+   · 정규표현식을 구분자로 해서 부분 문자열을 분리한 후 배열에 저장하고 리턴
+   · 구분자가 여러개일 경우 "|"를 사용해서 입력한다.
+   · 매개값으로 구분자와 index를 주면 index번째부터 구분자로 분리한다.
+     단, index가 음수면 앞뒤 상관없이 구분자를 기준으로 다 분리한다.
+
+ - StringTokenizer
+   · StringTokenizer st = new StringTokenizer(문자열명, 구분자)
+   · 구분자가 여러개일 경우 "|"를 사용해서 입력한다.
+   · 분리된 문자는 객체에 저장된다.
+   · countTokens()
+     - 구분되어 있는 갯수
+     - 구분이 안되어 있으면 전체를 하나로 보고 1을 리턴)
+   · nextToken()
+     - 이전 토큰을 내보내고 다음 토큰
+   · hasMoreTokens()
+     - 가지고 있는 토큰의 유무를 true/false로 리턴
+ ※ split()과 StringTokenizer의 차이
+   - split()은 공백도 배열에 포함시키지만,
+     StringTokenizer는 공백을 제외시킨다.
+   - split()의 장점 : 정규표현식을 사용해서 다양하게 쪼갤 수 있다.
+                단점 : 속도가 느리다.
+   - StringTokenizer의 장점 : 속도가 빠르다.(다량의 데이터)
+                            단점 : 정규표현식을 사용할 수 없고, 단순한 문자로만 쪼갤 수 있다.
+
+정규표현식(Regular Expression)과 Pattern 클래스
+ - 정규표현식 : 문자열이 정해져 있는 형식
+   · 이메일, 전화번호같이 형식이 정해져 있는 문자열을 제대로 입력했는지
+     검증해야 할 경우 정규 표현식과 비교한다.
+   · 모든 언어가 사용한다.
+   · 기호
+     - https://hamait.tistory.com/342 참고하기
+
+ - Pattern.matches(data1, data2)
+   · data1과 data2의 정규표현식이 일치하는지 true/false로 리턴한다.
+
+Arrays 클래스
+ - 배열의 조작을 도와주는 클래스
+    ※ 조작 : 복사, 항목 정렬, 항목 검색 등
+ - 단순한 배열 복사는 System.arraycopy()를 사용하면 되지만,
+    Arrays는 항목 정렬, 항목 검색, 항목 비교같은 기능까지 제공
+    ※ arraycopy(원본배열, 원본시작인덱스, 복사될배열, 복사시작인덱스, 복사길이) 
+ - Arrays 클래스의 모든 메소드는 static이므로 클래스명으로 바로 접근 가능
+ - copyOf(원본배열, 복사할길이)
+   · 원본 배열의 처음부터 복사할 길이만큼 복사한 배열을 리턴
+   · 복사할 길이는 원본 배열의 길이보다 커도 되며, 복사한 배열의 길이가 된다.
+
+ - copyOfRange(원본배열, 시작인덱스, 끝인덱스)
+   · 원본 배열의 시작 인덱스부터 끝 인덱스 전까지 복사한 배열을 리턴
+
+ - equals()
+   · 1차 항목의 값만 비교
+     (2차원 배열이면 1차원 배열의 주소까지만 비교)
+
+ - deepEquals()
+   · 1차 항목이 서로 다른 배열을 참조할 경우 중첩된 배열의 항목까지 비교
+     (2차원 배열이면 2차원 배열의 값까지 비교)
+ ※ 2차원 배열을 얕은 복제하면 원본과 복사본이 가지고 있는 1차원 배열의 주소는 같다.
+    깊은 복제를 하면 원본과 복사본이 가지고 있는 1차원 배열의 주소도 다르다.
+    깊은 복제 : 타입[][] 복제배열 = Arrays.copyOf(원본배열, 복사할길이)
+                   복제배열[n] = Arrays.copyOf(원본배열[n], 원본배열[n]의길이)
+
+ - sort()
+   · sort()의 매개값으로 기본형 또는 String 배열을 주면 자동으로 오름차순 정렬
+   · sort()의 매개값이 사용자 정의 클래스 타입일 경우 클래스가
+     Comparable 인터페이스를 구현하고 있어야 정렬이 된다.
+     compareTo()는 비교값을 리턴하도록 오버라이딩 한다.
+     compareTo()의 리턴값(음수, 0, 양수)으로 정렬하는 것
+     ※ 그냥 Arrays.sort(객체)하면 객체 안에 있는 무엇을 정렬하는지 모르기 때문에
+         compareTo()가 어떻게 재정의 되었느냐에 따라 정렬의 기준이 다르다.
+
+ - binarySearch(배열, 찾는값)
+   · 전체 배열 항목에서 찾는 값의 index를 리턴
+     없을 경우 음수를 리턴
+   · 사용 전에 Arrays.sort()로 정렬을 먼저 해야한다.
+
+ - fill(배열, 값)
+   · 전체 배열 항목에 동일한 값을 저장
+ - fill(배열, 시작인덱스, 끝인덱스, 값)
+   · 전체 배열 항목의 시작 인덱스부터 끝 인덱스 전까지 동일한 값을 저장한다.
+ - hashCode(배열)
+   · Object 클래스의 hashCode()를 재정의한 것 
+
+Wrapper 클래스
+ - 기본형을 객체화하도록 도와주는 클래스
+ - Boxing
+   · 기본형 -> 클래스
+     ex) Double d = new Double(3.14);
+ - UnBoxing
+   · 클래스 -> 기본형
+     ex) double dd = d.doubleValue();
+   · 다른 타입에 넣을 수도 있다.
+     ex) long l = d.longValue();
+     ※ 소숫점은 제외된다.
+ - 모든 타입의 생성자에 매개값으로 문자열을 줄 수 있다.
+    ex) Integer i = new Integer("100");
+    ※ 단, Character는 제외
+ - 숫자로만 이루어진 문자열 타입을 숫자 타입으로 바꿀 경우
+    정수 -> Integer.parseInt(문자열변수)
+    실수 -> Double.parseDouble(문자열변수) 등
+    ※ 문자열에 숫자가 아닌 문자가 있으면 NumberFormatException 발생
+ - 자동 Boxing과 자동 UnBoxing
+   · 자동 Boxing
+     - 포장 클래스 타입에 기본값이 대입될 경우
+        ex) Integer i = 100;//자동으로 힙영역에 객체 생성
+   · 자동 UnBoxing
+     - 기본 타입에 포장 객체가 대입될 경우
+        ex) Integer i = new Integer(200);
+             int value = i;//자동 UnBoxing
+             int sum = i + value;//자동 UnBoxing
+ - Wrapper 클래스는 boolean, char, byte, short, int만 ==, !=연산자를 사용 가능
+   그냥 모든 타입을 equals()로 비교하는 것이 좋을 듯
+   ※ Wrapper 클래스의 equals()는 내부의 값을 비교하도록 재정의되어 있다.
+
+Math 클래스
+ - 수학 계산에 사용할 수 있는 static 메소드를 제공
+ - random()의 기본 구조
+   · 0.0 <= random() < 1.0
+
+Random 클래스
+ - 난수를 얻어내기 위한 다양한 메소드를 제공한다.
+
+ - 기본 생성자와 long seed를 매개값으로 받는 명시적 생성자가 있다.
+   · Random r = new Random();
+   · Random r = new Random(long seed);
+     - 매개값이 기준점
+       · 없는 경우 : 기준이 없기 때문에 규칙성도 없어서 난수 발생
+       · 시간을 준 경우 : 시간은 계속 변하기 때문에 규칙성도 계속 변해서 난수 발생
+       · 3,5같이 상수로 준 경우 : 기준점이 잡혀있어서 규칙성이 생기기 때문에 다음 수를 예측 가능(난수 x)
+
+ - r.nextInt(범위), r.nextDouble(범위), r.nextBoolean(범위);
+   · 범위가 5일 경우, 5는 포함되지 않으므로 범위를 6으로 주거나, 뒤에 +1을 해준다.
+   · 매개값을 안주면 타입범위 내의 난수를 리턴
+
+Date 클래스
+ - 날짜를 표현하는 클래스
+ - 특정 시점의 날짜 정보를 저장하는 역할
+ - 특정 문자열 형식으로 날짜를 얻고 싶다면
+    SimpleDateFormat 클래스를 이용한다.
+
+Calendar 클래스
+ - 달력을 표현한 클래스
+ - 날짜와 시간을 조각하거나 비교하는 기능이 불충분
+ - 추상 클래스이므로 new 연산자를 이용해서 인스턴스를 생성할 수 없다.
+   · 추상 클래스는 인스턴스가 없기 때문에...
+   ※ 추상 클래스인 이유는 나라마다 날짜와 시간을 계산하는 방법이 다르기 때문이다.
+
+ - 사용할 때는 c.get(Calendar.Year)처럼 사용한다.
+   · Calendar.YEAR만 하면 저 필드가 가진 상수값이 출력된다.
+     상수값은 c.get()에 매개값으로 주면 상수값을 가진 필드가 출력된다.
+
+ - 월은 0부터 시작하기 때문에 +1을 해준다.
+
+ - 요일은 일요일(1), 월요일(2), ..., 토요일(7)
+
+ - 다른 시간대에 해당하는 날짜와 시간을 출력하기
+   · Calendar 클래스의 오버로딩된 다른 getInstance()를 사용
+     ex) TimeZone t = TimeZone.getTimeZone("America/Los_Angels");
+          Calendar c = Calendar.getInstance(t);
+          ※ getTimeZone()의 매개값은 getAvailableIDs()를 호출하여 얻을 수 있다.
+
+Format 클래스
+ - 자료의 형식을 맞춰주는 클래스
+ - DecimalFormat
+   · 숫자 데이터를 원하는 형식으로 표현하기 위해서 패턴을 사용
+     - 0 : 10진수(빈자리는 0으로 채움)
+     - # : 10진수(빈자리는 채우지 않음)
+     - .  : 소숫점
+     - ,  : 단위 구분
+     - ;  : 양수와 음수의 패턴을 모두 기술할 경우, 패턴 구분자
+     - E  : 지수 문자
+     - % : 100을 곱한 후 % 문자를 붙임
+     - -  : 음수 기호
+     - \u00A4 : 통화 기호 
+   · 사용 예시
+     DecimalFormat df = new DecimalFormat("#,###.0");
+     String result = df.format(1234567.89);
+     결과 : 1,234,567.89
+
+ - SimpleDateFormat
+   · Date 클래스에서 주로 사용
+   · 날짜를 원하는 형식으로 표현하고 싶을 때 사용
+     - y = 년			- H = 시(0~23)
+     - M = 월			- h = 시(1~12)
+     - d = 일			- K = 시(0~11)
+     - D = 월 구분이 없는 일(1~365)	- k = 시(1~24)
+     - E = 요일			- a = 오전/오후
+     - w = 년의 몇 번재 주		- m = 분
+     - W = 월의 몇 번째 주     	- s = 초
+				- S = 밀리초(1/1000)
+   · 사용 예시
+     SimpleDateFormat sdf = new SimpleDateFormat("HH : mm : ss");
+     형식을 생성자의 매개값으로 준다.
+     사용은 String str = sdf.format(Date의 객체);
+
+ - MessageFormat
+   · 데이터를 파일에 저장하거나, 네트워크로 전송하거나,
+     DB SQL문을 작성할 때 등 많은 부분에서 일정한 형식의 문자열을 사용
+   · 문자열에 데이터가 들어갈 자리를 표시하고,
+     프로그램이 실행하면서 동적으로 데이터를 삽입해서 문자열을 완성한다.
+   · 사용 예시
+     String text = "ID: {0}\nName: {1}\nNum: {2}";
+     Object[] arguments = {id, name, tel};
+     String result = MessageFormat.format(text, arguments);
+
+java.time 패키지
+ - 날짜와 시간 객체 생성
+   · 날짜와 시간을 조작하거나 비교하는 기능 등이 들어있다.
+   · java.time.chrono
+     - ISO-8601에 정의된 달력 시스템 외에
+       다른 달력 시스템이 필요할 때 사용할 수 있는 API들이 포함
+       ※ ISO-8601 : 날짜와 시간의 표기에 관한 국제 표준 규격
+           · 연월일로 기록하는 방법
+             - 1992-01-30 or 19920130 = 1992년 1월 30일
+           · 연과 연중 일수로 기록하는 방법
+             - 1992-130 or 1992130 = 1992년의 130번째 날
+           · 연과 주와 주중 일수로 기록하는 방법
+             - 1992-W07-7 or 1992W077 = 1992년 7번째 주의 일요일
+   · java.time.format
+     - 날짜와 시간을 파싱하고 포맷팅하는 API들이 포함
+        ※ parsing : 형을 바꾼다.
+   · java.time.temporal
+     - 날짜와 시간을 연산하기 위한 보조 API들이 포함
+   · java.time.zone
+     - 타임존을 지원하는 API들이 포함
+   · java.time
+     - 날짜와 시간을 나타내는 핵심 API들이 포함
+     - LocalDate : 로컬 날짜 클래스
+      · 날짜 정보만 저장
+      · now() : 컴퓨터의 현재 날짜 정보를 LocalDate 타입으로 리턴
+      · or() : 매개값으로 주어진 날짜 정보를 LocalDate 타입으로 리턴
+               날짜를 마음대로 조작
+               ex) LocalDate.of(년, 월, 일)
+      · getYear() : 년
+      · getMonth(), getMonthValus() : 월(영어, 숫자)
+      · getDayOfYear() : 일년의 몇 번째 일
+      · getDayOfMonth() : 월의 몇 번째 일
+      · getDayOfWeek() : 요일(영어)
+      · isLeapYear() : 윤년(true/false)
+
+     - LocalTime : 로컬 시간 클래스 
+      · 시간 정보만 저장
+      · now() : 컴퓨터의 현재 시간 정보를 LocalTime 타입으로 리턴
+      · of() : 매개값으로 주어진 시간 정보를 LocalTime 타입으로 리턴
+               시간을 마음대로 조작
+               ex) LocalTime.of(시, 분, 초, 나노초)
+      · getHour() : 시
+      · getMinute() : 분
+      · getSecond() : 초
+      · getNano() : 나노초
+
+     - LocalDateTime : 로컬 날짜 및 시간 클래스
+      · LocalDate + LocalTime, 날짜와 시간을 저장
+      · now() : 컴퓨터의 현재 날짜와 시간 정보를 LocalDateTime 타입으로 리턴
+      · of() : 매개값으로 주어진 날짜와 시간 정보를 LocalDateTime 타입으로 리턴
+               ex) LocalDAteTime.of(년, 월, 일, 시, 분, 초, 나노초)
+      · LocalDate와 LocalTime의 메소드를 사용 가능
+        ※ isLeapYear()는 LocalDate에만 있기 때문에 toLocalDate()로 타입을 변환 후 사용
+
+     - ZonedDateTime : 특정 타임존의 날짜와 시간 클래스
+      · 다른 나라의 날짜와 시간 정보를 저장
+      · 맨 뒤에 +ZoneOffset[Asia/Seoul]같이 타임존에 대한 정보가 붙는다.
+      · ZoneOffset : 협정세계시(UTC)와의 시차
+        ex) ZonedDateTime.now(ZoneId.of("나라"))
+             of()의 매개값은 java.util.TimeZone의 getAvailableIDs()가 리턴하는 값
+      · LocalDate와 LocalTime의 메소드를 사용 가능
+        ※ isLeapYear()는 LocalDate에만 있기 때문에 toLocalDate()로 타입을 변환 후 사용
+      · getZone() : ZoneId를 리턴
+      · getOffset() : 시차를 리턴
+
+     - Instant : 특정 시점의 Time-Stamp 클래스
+      · 주로 특정한 두 시점 간의 시간적 우선순위를 따질 때 사용
+      · Date 클래스와 유사하지만 Date는 현재 컴퓨터가 기준
+                                         Instant는 세계협정시가 기준
+      · isBefor(), isAfter() : 시간의 앞뒤 여부를 확인
+        ex) 시간1.isBefore(시간2)
+      · until() : 두 시점 간의 차이를 리턴
+        ex) 시간1.until(시간2, ChronoUnit.HOUR);
+      · ISO-8601에 정의된 달력 시스템에 기초
+
+ - 날짜와 시간 조작
+   · puls/minus+날짜(long)
+     리턴타입 : LocalDate, LocalDateTime, ZonedDateTime
+     ex) plusYears(long), minusYears(long)
+   · puls/minus+시간(long)
+     리턴타입 : LocalDate, LocalDateTime, ZonedDateTime
+     ex) plusSecounds(long), minusMinutes(long)
+   · "." 연산자로 연결해서 순차적으로 호출 가능
+     ex) LocalDateTime target = now.plusYears(1)
+			         .minusMonths(2)
+                                             .minusDays(3);
+   · with+날짜(int)
+     ex) withDayOfYear(int)
+   · with+시간(int)
+     ex) withMinute(int)
+   · with(TemporalAdjuster adjuster) : 현재 날짜를 기준으로 상대적인 날짜를 리턴
+     ex) with(TemporalAdjusters.firstDayOfYear()) : 이번 해의 첫 번째 일
+
+ - parsing과 Formatting
+   · parsing
+     - 문자열을 파싱해서 날짜와 시간을 생성하는 메소드
+     - String str = "2020-12-06";처럼 문자열에 날짜나 시간이 있으면
+        LocalDate ld = LocalDate.parse("2020-12-06"); 해서
+        LocalDate 타입으로 바꿀 수 있다.
+   · Formatting
+     - 날짜와 시간을 포맷팅된 문자열로 변환하는 메소드
+     - 날짜나 시간의 형식이 일반적이지 않은 경우,
+        패턴을 만들어 파싱하는데 사용할 수 있다.
+     - String str = "2020년 12월 06일";
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
+        LocalDate ld = LocalDate.parse(str, dtf);
+        결과 : 2019-12-06
+                2019년 12월 06일
+
+StringBuffer와 StringBuilder 클래스
+ - String은 내부의 문자열을 수정할 수 없다.
+    (수정되는 것이 아니라 새로운 객체가 생성되는 것)
+ - 문자열을 결합하는 +연산자를 많이 사용하면 할수록 
+    그만큼 String의 객체의 수가 늘어나기 때문에 프로그램 성능을 느리게 하는 요인이 된다.
+ - StringBuffer와 StringBuilder클래스는 내부 버퍼에 문자열을 저장해 두고,
+    그 안에서 추가, 수정, 삭제 작업을 할 수 있도록 설계(새로운 객체생성 x)
+    ※ buffer : 데이터를 임시로 저장하는 메모리
+
+ - 사용법
+   · StringBuilder sb = new StringBuilder();
+     StringBuffer sb = new StringBuffer();
+     매개값이 초기 버퍼의 크기지만 부족할 경우 
+     자동으로 버퍼 크기를 늘리기 때문에 초기 버퍼의 크기는 중요하지 않음
+   · append(문자열) : 문자열 끝에 주어진 매개값을 추가
+   · insert(index, 문자열) : 문자열 중간에 주어진 매개값을 추가
+   · delete(index1, index2) : index1번부터 index2 전까지 삭제
+   · deleteCharAt(index) : index의 문자를 삭제
+   · replace(index1, index2, 문자열) : index1부터 index2 전까지 바꿈
+   · StringBuilder reverse() : 문자열의 순서를 뒤바꿈
+   · setCharAt(index, char) : index의 문자를 다른 문자로 바꿈
+
+ - 두 가지지의 차이점
+   · 두 가지의 사용 방법은 동일함
+   · StringBuffer는 멀티 스레드 환경에서 사용할 수 있도록 
+     동기화가 적용되어 있어 스레드에 안전하다.
+   · StringBuilder는 단일 스레드 환경에서만 사용하도록 설계

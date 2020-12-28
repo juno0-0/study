@@ -1,0 +1,164 @@
+정렬(sorter())
+ - 중간 처리 메소드
+ - sort를 사용하려면 정렬해야 하는 클래스를 Comparable의 구현 클래스로 만들어준다.
+ - 기본은 오름차순 정렬이지만 내림차순으로 정렬하려면 sorted(Comparator.reverseOrder()) 사용
+
+루핑(peek(), forEach())
+ - 요소 전체를 반복하는 것
+ - peek()는 최종 처리가 없으면 동작하지 않음
+    당장 최종 처리를 하지 않을 경우 peek()까지만 만들어 놓는다.
+ - 최종 처리는 스트림당 1번만 가능
+    2번 하면 IllegalStateException 발생
+
+매칭(allMatch(), anyMatch(), noneMatch())
+ - 최종 처리 바로 직전에 쓰는 메소드로 
+    요소들이 특정 조건을 만족하는지 조사
+ - allMatch() : 모든 요소들이 매개값으로 주어진 Predicate의 조건이 true인지 조사
+                  전부 true면 true, 하나라도 false면 false
+ - anyMatch() : 최소한 한개의 요소가 매개값으로 주어진 Predicate의 조건이 true인지 조사
+                    하나라도 true면 true, 아니면 false
+ - noneMatch() : allMatch()의 반대, 전부 false면 true
+                      조건이 하나라도 true면 false, 전부 false면 true
+
+기본집계(sum(), count(), average(), max(), min())
+ - 최종 처리 메소드
+ - 카운팅, 합계, 평균값, 최대값, 최소값처럼 리덕션하는 것
+   ※ 리덕션 : 여러 개의 값을 하나의 값으로 산출하는 것
+
+Optional 클래스
+ - 단순히 집계 값만 저장하는 것이 아니라
+    집계 값이 존재하지 않을 경우 디폴트 값(임의의 값)을 설정할 수 있음
+ - 컬렉션 요소는 동적으로 추가되는 경우가 많다.
+    (동적으로 추가 : 당장 데이터를 넣지는 않고 나중에 데이터를 넣는 경우,
+                         데이터가 없어서 NoSuchElementException 발생)
+   		 이 예외를 Optional 클래스로 잡아주는 것
+ - isPresent() : 데이터(요소)가 있으면 true, 없으면 false
+ - orElse() : 데이터가 없으면 orElse()의 매개값으로 대체
+ - ifPresent(람다식) : 데이터가 있으면 람다식 실행, 없으면 실행하지 않음
+ - ifPresentOrElse(람다식1, 람다식2) : 데이터가 있으면 람다식 실행, 없으면 뒤에 있는 람다식으로 대체
+                          ex) s->syso(s), ()->syso(매개값)
+                              값이 있으면실행, 없으면 뒤에있는게 실행
+
+커스텀 집계(reduct())
+ - 프로그램화해서 다양한 집계 결과물을 만들 수 있도록 만든 것
+ - reduce(BinaryOperator<Integer> accumulator)) : 매개값으로 Operator 람다식을 넣는다.
+ - reduce(int identity, IntBinaryOperator op) : 요소가 있으면 identity+람다식을 리턴, 없으면 identity만 리턴
+				          identity는 기본값
+
+수집(collect())
+ - 최종 처리 메소드
+ - 필요한 요소만 컬렉션으로 담을 수 있고, 요소들을 그룹핑한 후 집계
+ - collect(Collector<T,A,R> collector) : T는 요소, A는 누적기, R은 요소를 저장할 컬렉션
+				 A가 T를 R에 저장
+ ※ Collector의 누적기가 "?"인 이유 : List, Set, Map은 Collector 내부에서 
+			          Collection에 저장하는 방법을 이미 알고 있기 때문에 
+	 		          별도의 누적기가 필요 없음
+ - Collectors클래스의 정적 메소드 (collect의 매개값)
+   · Collectors.toList() : T를 List에 저장
+   · Collectors.toSet() : T를 Set에 저장
+   · Collectors.toMap() : T를 Map에 저장
+   · Collectors.toConcurrentMap() : T를 K와 U로 매핑해서 K를 Key로, U를 Value로 ConcurrentMap에 저장
+			        ConcurrentMap : 멀티 스레드 환경에서 안전함
+   · Collectors.toCollection(Supplier<T>) : T를 Supplier가 제공한 컬렉션에 저장
+				     ArrayList, LinkedHashSet 등을 만들 때 사용
+
+사용자 정의 컨테이너에 수집
+ - 사용자 정의 컨테이너 객체에 수집하는 방법
+   ※ 사용자 정의 컨테이너 : 개발자가 작성한 클래스
+ - collect(Supplier<R>, XXXconsumer<R.? super T>, Biconsumer<R,R>)
+   · Supplier : 수집될 컨테이너 객체(R)를 생성하는 역할★
+	      순차처리(싱글스레드) 스트림에서는 단 한 번 Supplier가 실행되고 하나의 컨테이너 객체를 생성
+	      병렬처리(멀티스레드) 스트림에서는 여러번 Supplier가 실행되고 스레드별로
+	      여러 개의 컨테이너 객체를 생성하지만 
+	      최종적으로 BiConsumer가 하나의 컨테이너 객체로 결합
+   · XXXConsumer : 컨테이너 객체(R)에 요소(T)를 수집하는 역할★
+		 스트림에서 요소를 컨테이너에 수집할때마다 XXXConsumer가 실행
+   · BiConsumer : 컨테이너 객체(R)를 결합하는 역할★
+	          순차처리 스트림에서는 호출되지 않고★★★
+	          병렬처리 스트림에서만 호출되어 스레드별로 생성된 컨테이너 객체를 결합해서
+	          최종 컨테이너 객체를 완성
+   ※ 컨테이너 : 개발자가 만든 클래스
+
+요소를 그룹핑해서 수집
+ - collect()의 매개값은 Collector 객체가 된다.
+ - groupingBy()와 groupingConcurrent()도 Collector를 리턴
+ - collect()는 컬렉션의 요소들을 그룹핑해서 Map 객체를 생성하는 기능을 제공
+ - collect()를 호출할 때 Collectors의 groupingBy() 또는 groupingByConcurrent()가 리턴하는 
+   Collector()를 매개값으로 대입
+ - groupingBy()는 스레드에 안전하지 않은 Map을 생성하지만,(싱글스레드)
+    groupingByConcurrent()는 스레드에 안전한 ConcurrentMap에 생성(멀티스레드)
+
+   ※ Function<T,K> : 어떤 요소(T)를 어떤 Key(K)에 저장할 지 정해주는 것
+                           Function의 정의 내용에 따라 Key가 결정
+      Collector<T,A,D> : T(원래 요소)를 매핑해서 D(컬렉션)에 저장
+                              T는 원래 요소의 타입, A는 누적기, D는 값에 저장될 컬렉션의 타입
+      Supplier<Map<K,D>> : 맵을 제공한다.
+	   	            매개값에 Supplier가 없으면 자동적으로 만들어진 Map에 저장
+
+   ※ 그룹핑 후 매핑 및 집계(리덕션)
+     - Collector<T,A,D>의 매개값으로 줄 수 있는 Collector
+     - 모든 메소드의 리턴값은 Collector
+      · Collectors.mapping(Function<T, K>, Collectors<T,A,D>) 
+         - Function으로 매핑해서 매핑한 것을 컬렉션(D)에 저장하는 메소드
+         - Function은 어떤 객체를 뭘로 매핑할꺼냐(ex 학생 객체를 이름으로 매핑)
+         - Collectors는 매핑한 것을 어떤 컬렉션에 넣을 것이냐
+      · Collectors.averagingDouble(ToDoubleFunction) 
+         - 평균값
+      · Collectors.counting()
+         - 평균값
+      · Collectors.joining(연결자)
+         - 문자 요소들을 연결
+      · Collectors.maxBy(Comparator)
+         - 최대값
+      · Collectors.minBy(Comparator)
+         - 최소값
+         - 매개값인 Comparator는 무엇으로 비교할지 힌트를 제공
+      · Collectors.reducing(...)
+         - 커스텀 리덕션 값
+      · Collectors.summarizingXXX(ToXXXFuncton)
+         - XXX 타입의 합계
+
+   1) groupingBy(Function<T,K> classifier)
+   2) groupingByConcurrent(Function<T,K> classifier)
+     - T를 K로 매핑하고 K에 저장된 List에 T를 저장한 Map 생성
+     - K 하나에 List 하나
+     - 리턴타입 : Collector<T,?,Map<K,List<T>>>
+     - ex) Map<Student.Sex, List<Student>> mapBySex = totalList.stream()
+		.collect(Collectors.groupingBy(s->s.getSex()));
+		getSex()이 Key가 되서 s를 저장
+
+   3) groupingBy(Function<T,K> classifier, Collector<T,A,D> collector)
+   4) groupingByConcurrent(Function<T,K> classifier, Collector<T,A,D> collector)
+     - T를 K로 매핑하고 K(Key)에 저장된 D 객체에 T를 누적한 Map 생성
+     - Key로 요소를 저장을 하는데, T를 저장하는게 아니라 T를 매핑한 객체를 저장
+       ex) 남학생을 저장할 때 남학생 객체를 직접 저장하는게 아니라 이름이나 점수같이
+            남학생을 대체한 다른 요소들을 저장할 수 있다.
+     - ex) Map<Student.City, List<String>> mapByCity = totalList.stread()
+		.collect(Collectors.groupingBy(
+			Student::getCity,//s->s.getCity() = getCity()가 Key가 되서 s를 저장
+			Collectors.mapping(Student:;getName, Collectors.toList())
+					Student의 이름을 얻어서 List에 저장해서 Collector를 만드는 것	
+
+		
+   5) groupingBy(Function<T,K> classifier, Supplier<Map<K,D>> mapFactory,Collector<T,A,D> collector)
+   6) groupingByConcurrent(Function<T,K> classifier, Supplier<Map<K,D>> mapFactory,Collector<T,A,D> collector)
+     - T를 K로 매핑하고 Supplier가 제공하는 Map에서 K(Key)에 저장된 D 객체에 T를 누적
+
+   ※ 1,2번과 3,4,5,6번의 차이는 1,2번은 요소를 저장하고 3,4,5,6번은 요소를 매핑한 객체를 저장
+       3,4번과 5,6번의 차이는 3,4번은 자동적으로 만들어진 Map에 저장,
+			5,6번은 Supplier가 제공하는 Map에 저장
+
+   ※ 누적기가 ?인 이유 : List, Set, Map는 컬렉터 내부에서 컬렉션에 저장하는 방법을 
+	                   이미 알고 있기 때문에 별도의 누적기 필요 없다.
+
+※ get() : 값이 있으면 값을 반환, 그렇지 않으면 NoSuchElementException을 throw
+	map으로 매핑하면 get()으로 Optional타입을 기본형으로 변환
+	getAsInt()나 getAsDouble()은 mapToInt나 mapToDouble을 사용한 경우 호출.
+
+
+
+
+
+
+
+

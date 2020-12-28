@@ -1,0 +1,116 @@
+Map 
+ - Hashtable
+   · HashMap과 차이점은 Hashtable이 가지고 있는 메소드는
+     동기화된 메소드로 구성
+     (synchronized가 붙어 있다.)
+     Vector나 StringBuffer처럼 멀티 스레드 프로그램에서 사용)
+   ※ synchronized가 만든 임계 영역은 멀티 스레드가 동시에 사용할 수 없고,
+      하나의 스레드가 사용중일 때 다른 스레드는 기다린다.
+      = 안전하게 객체를 추가, 삭제할 수 있다.
+
+ - Properties
+   · Hashtable의 하위 클래스라서 
+     Hashtable의 모든 특성을 그대로 가지고 있다.★
+     - 구조로 보면 HashMap = Hashtable = Properties)
+     - Map의 특성대로 저장 순서를 유지하지 않는다.
+       ※ Map = Key(이름표)와 Value 한 쌍이 Set처럼 주머니에 들어있는 것
+                    Key는 주머니 밖에 나와있다.
+   · Hashtable과 Properties의 차이점
+     - Hashtable은 키과 값을 다양한 타입으로 지정 가능
+     - Properties는 키와 값을 String 타입으로만 가능★
+   · 사용하는 곳
+     - 애플리케이션의 옵션 정보, 데이터베이스 연결 정보, 국제화(다국어) 정보가
+        저장된 프로퍼티 파일을 읽을 때 주로 사용함.
+   · put() 대신 setProperty()를 사용해도 되고,
+     get() 대신 getProperty()를 사용해도 된다.
+     (key가 존재하지 않으면 null 리턴)
+   · Properties는 컬렉션프레임워크 이전의 구버전이기 때문에
+     Iterator가 아닌 Enumeration을 사용
+   · list()
+     - Properties에 저장된 모든 데이터를 화면 또는 파일에 편리하게 출력
+       ex) list(System.out)
+
+ - TreeMap
+   · TreeSet은 값, 왼쪽 노드의 주소, 오른쪽 노드의 주소를 가지지만,
+     TreeMap은 값 대신 Map.Entry를 저장
+     ※ Map.Entry = Key와 Value 한 쌍
+   · 객체를 저장하면 자동으로 정렬
+     (Root와 비교해서 낮은건 왼쪽, 높은건 오른쪽)
+
+Collections
+ - 컬렉션과 관련된 메소드를 제공
+ - 제네릭 기술을 사용한 정적 메소드들이 있음
+ - 자주 사용하는 알고리즘으로 정렬, 섞기, 탐색 등
+ - 정렬(Sorting)
+   · 데이터를 어떤 기준에 의해 순서대로 나열하는 알고리즘
+   · Collections 클래스의 정렬은 속도가 비교적 빠르고
+      안정성이 보장되는 합병 정렬을 이용
+      ※ 안정성 : 동일한 값을 가지는 원소를 다시 정렬하지 않는 것
+	        같은 리스트를 반복하여 다른 기준에 따라 정렬할 때 중요
+	        안정성 있는 정렬 = 한번 정렬된 것이 유지되는 정렬
+ - 섞기(Shuffling)
+   · 리스트에 존재하는 정렬을 파괴하여 원소들의 순서를 랜덤하게 만듬
+     = 정렬과 반대 동작
+
+Stack
+   · LIFO 자료구조를 구현한 클래스
+     - 먼저 들어간게 나중에 나옴
+   · Vector의 자식 클래스 = List의 구현클래스
+   · 스택의 주요 메소드
+     - push(), peek(), pop()
+   · peek()과 pop()의 차이
+     - peek()은 불러오기만 하는 것(스택에 남음)
+        pop()은 스택에서 값을 가져오는 것(스택에서 사라짐)
+
+Queue
+   · FIFO 자료구조에서 사용되는 메소드를 정의한 인터페이스
+     - 먼저 들어간게 먼저 나옴, 선착순 구조
+   · Collection을 상속 받음
+   · 큐에 정의된 있는 메소드
+     - offer(), peek(), poll()
+   · peek()과 poll()의 차이
+     - peek()은 불러오기만 하는 것(스택에 남음)
+        poll()은 스택에서 값을 가져오는 것(스택에서 사라짐)
+   · Queue를 구현한 대표적인 클래스는 LinkedList
+
+동기화된 컬렉션
+   · 컬렉션 프레임워크에서 Vector와 Hashtable만 동기화된 메소드로 
+     구성되어 있고, 나머진 그렇지 않아서 멀티 스레드 환경에서 안전하지 않음.
+   · Collections의 synchronizedXXX()
+     - 동기화되지 않은 메소드를 동기화된 메소드로 래핑하는 메소드
+
+병렬 처리를 위한 컬렉션
+   · 동기화된 컬렉션은 멀티 스레드 환경에서 하나의 스레드가
+     요소를 안전하게 처리하도록 도와주지만, 전체 요소를 빠르게 처리하진 못함
+     = 하나의 스레드가 요소를 처리하는 동안 나머지 스레드는 대기 상태가 되서.
+   · ConcurrentHashMap과 ConcurrentLinkedQueue
+     - 멀티 스레드가 병렬적으로 컬렉션 요소를 처리할 수 있도록 제공하는 컬렉션
+     - ConcurrentHashMap
+       · Map의 구현 클래스
+       · 부분 잠금을 사용하기 때문에 멀티 스레드가 요소를 병렬적으로 처리 가능
+         ※ 부분 잠금 : 처리하는 요소가 포함된 부분만 잠금하고 나머지 부분은 
+                           다른 스레드가 변경할 수 있도록 하는 것(동기화 블록?)
+     - ConcurrentLinkedQueue : Queue의 구현 클래스
+       · lock-free 알고리즘을 구현한 컬렉션
+         ※ lock-free : 여러 개의 스레드가 동시에 접근할 경우,
+ 		  잠금을 사용하지 않고도 최소한 하나의 스레드가
+		  안전하게 요소를 저장하거나 얻도록 해준다.
+
+총 정리
+List - 중복 : 가능, 순서 : o
+ · ArrayList - 배열이 기반(배열구조), 추가할 때 제일 빠름
+ · LinkedList - 연결이 기반(체인구조), 삽입, 삭제가 빈번하게 일어날 때 사용
+ · Vector - 동기화된 메소드로 구성되어 있어서 멀티 스레드 환경에서 안전함
+Set - 중복 : 불가능, 순서 : x, 집합처리
+ · HashSet : 중복을 제거하고 싶을 때 사용
+ · TreeSet : 이진 트리 구조, 정렬·검색이 빠름
+ · LinkedHashSet : HashSet을 보완한 것, 순서 o
+Map - <Key, Value>으로 이루어진 Map.Entry가 Set 구조의 주머니에 들어있음
+          중복 : Key만 불가능(중복된 Key를 넣으면 Value의 값이 새로운 걸로 변경)
+          순서 : x
+ · HashMap : Map의 기본적인 구조
+ · Hashtable : 동기화된 메소드로 구성되어 있어서 멀티 스레드 환경에서 안전함
+ · TreeMap : 이진 트리 구조, 정렬·검색이 빠름
+ · Properties : Hashtable과 똑같지만 Key와 Value 타입을 String만 쓸 수 있다.
+
+

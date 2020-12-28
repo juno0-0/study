@@ -1,0 +1,105 @@
+collect() 메소드 안에 요소로 groupingBy()를 넣은 것?
+
+성별로 그룹핑하고, 같은 그룹에 속하는 학생 List를 생성 후
+성별을 키로 학생 List를 값으로 갖는 Map 생성
+
+Collectro<Student, ?, Map<Student.Sex,List<Student>>> collector
+               자료                     리턴타입
+
+collect(groupingBy()) = 그룹별로 수집
+
+groupingBy()에서 첫번째 매개값은 분류 기준, 두번째 매개값은 원하는 결과를 얻는 메소드(평균, 인원수, 연결 등)
+ex) Map<Student.Sex, Double> mapBySex = totalList.stream()
+     .collect(Collectors.groupingBy(Student::getSex,//그룹핑 기준
+			       Collectors.averagingDouble(Student::getScore)));//원하는 결과 얻는 메소드 
+
+
+그룹핑 후 매핑 및 집계
+ - groupingBy()는 그룹핑 후, 매핑이나 집계(평균, 카운팅, 연결, 최대, 최소, 합계)를 할 수 있도록
+   두번째 매개값을 Collector를 가질 수 있다.
+
+Stream.of() : 배열을 오리지널 스트림으로 만든다.
+
+collectingAndThen() : 조건이 만족할 때 모음
+
+입출력 패키지
+ - 입력 스트림 : 키보드, 파일, 프로그램
+                     프로그램을 기준으로 데이터가 들어오면 입력 스트림
+ - 출력 스트림 : 모니터, 파일, 프로그램
+                     데이터가 나가는 것
+ - 자바에서 데이터는 스트림을 통해 입출력되고, 스트림의 특징은 단일 방향으로 연속해서 흘러가는 것
+    (들어올 때 쓰는 스트림과 나갈 때 쓰는 스트림을 따로 관리)
+ - File : 파일 시스템의 파일의 정보를 얻기 위한 클래스
+ - Console : 콘솔로부터 문자를 입출력하기 위한 클래스
+ - InputStream/ OutputStream : 바이트 단위 입출력을 위한 최상위 입출력 스트림 클래스
+ - FileIn/OutputStream
+   DataIn/OutputStream
+   ObjectIn/OutputStream	InputStream/ OutputStream의 하위 클래스
+   PrintStream
+   BufferedIn/OutputStream
+ - Reader / Writer : 문자 단위 입출력을 위한 최상위 입출력 스트림 클래스
+ - FileReader / FileWriter
+   InutStreamReader / OutputStreamWriter	Reader / Writer의 하위 클래스
+   PrintWriter
+   BufferedReader / BufferedWriter
+
+스트림 클래스 종료
+ - 바이트 기반 스트림 : 모든 종류의 데이터를 받고 보낼 수 있다.
+ - 문자 기반 스트림 : 문자만 받고 보낼 수 있도록 특화되어 있다.
+
+ - 워드프로세스에서 연 문자는 문자가 아님
+   메모장에서 열어 볼 수 있는 파일이 문자
+
+바이트기반이 베이스
+
+read()
+ - 입력 스트림으로부터 1바이트를 읽고 4바이트 int 타입으로 리턴
+    따라서 4바이트중 마지막 1바이트만 데이터에 들어있음
+
+read() : 입력 스트림으로부터 1바이트를 읽어 읽은 바이트를 리턴
+read(byte[] b) : 입력 스트림으로부터 읽은 바이트들을 매개값으로 주어진 바이트 배열 b에
+                    저장하고 실제로 읽은 바이트 수를 리턴
+read(byte[] b, int off, int len) : 입력 스트림으로부터 len 개의 바이트만큼 읽고 
+                                       매개값으로 주어진 바이트배열 b[off]부터 len개까지 저장
+			   실제로 읽은 바이트 수인 len 개를 리턴
+			   len개를 모두 읽지 못하면 실제로 읽은 바이트 수를 리턴
+close() : 사용한 자원을 반납하고 입력 스트림을 닫음
+
+
+write() : 출력 스트림으로 1바이트를 내보낸다.
+write(byte[] b) : 출력 스트림에 매개값으로 주어진 바이트 배열 b의 모든 바이트를 보냄
+write(byte[] b, int off, int len) : 출력 스트림에 매개값으로 주어진 바이트 배열 b[off]부터 len개까지의 바이트를 보냄
+flush() : 버퍼에 잔류하는 모든 바이트를 출력
+close() : 사용한 시스템 자원을 반납하고 출력 스트림을 닫는다.
+
+
+Reader
+ - 문자 기반 입력 스트림의 최상위 클래스로 추상클래스
+ - 바이트 기반 입력 스트림과 같은 메소드를 가지고 있다.
+
+Scanner랑 syso와 콘솔입력스트림의 차이
+ - 콘솔 입력 스트림이 더 이전부터 사용하던 것
+ - Scanner에 더 많은 메소드가 있어서 Scanner를 사용하는게 더 좋다.
+ - 입출력스트림이 속도면에서 더 빠르고 스캐너는 편하다.
+
+flush()를 통해 출력
+flush()가 비운다는건 써놓은 값을 콘솔에 띄워주는 것
+
+
+파일 입출력
+1. File클래스
+ - IO패키지에서 제공하는 File클래스는 파일 크기, 파일 속성, 파일 이름등의 정보를 얻어내는 기능과
+   파일 생성 및 삭제 기능을 제공
+ - 디렉토리를 생성하고 디렉토리에 존재하는 파일 리스트를 얻어내는 기능
+ - 파일의 데이터를 읽고 쓰는 기능은 지원하지 않는다.
+
+2. 메소드
+ - createNewFile() : 새 파일 생성 true/false
+ - mkdir() : 새로운 디렉토리 생성 true/false
+ - mkdirs() : 경로상에 없는 모든 디렉토리를 생성 true/false
+ - delete() : 파일 또는 디렉토리 삭제 true/false
+
+
+보조스트림까지 복습하기
+
+

@@ -1,0 +1,116 @@
+Vector - 멀티 스레드 환경에서 사용할 때
+ArrayList - 맨 뒤에 추가하거나, 뭔가 찾는 과정이 많을 때
+LinkedList - 삽입, 삭제를 자주 할 때
+
+ArrayList
+ - contains() 
+   · ArrayList에 매개값이 있는지 true/false로 리턴
+ - isEmpty() 
+   · ArrayList가 비어있으면 true, 값이 있으면 false 리턴
+ - toArray()
+   · ArrayList를 배열로 리턴한다.
+   · 구조 : ArrayList(new String[ArrayList참조변수.size()])
+ - Arrays.asList()
+   · 같은 타입의 고정된 객체들을 사이즈가 고정된 ArrayList로 만드는 것
+     = 사이즈가 고정되어 있는데 add(), remove()를 사용하면 오류 발생
+        set()은 가능하다.
+   · 사용 예시
+     1) String[] test = {"a","b","c"};
+         List<String> list = Arrays.asList(test);
+     2) List<String> list = Arrays.asList("a","b","c");
+     매개값으로 배열명을 넣어도 되고 값을 직접 넣어도 된다.
+   · add()를 사용해야 하는 경우 new ArrayList를 한다.
+     ex) List<String> list = new ArrayList(Arrays.asList("a","b","c"));
+ - clear()
+   · ArrayList의 값을 모두 삭제
+ - addAll()
+   · 두 컬렉션을 합침(매개값으로 들어간 컬렉션은 비워짐)
+   · 합치고 나서 add()도 가능하다.
+ - containsAll() 
+   · 컬렉션의 모든 값이 포함되어 있는지 true/false로 리턴
+     ex) a.containsAll(b)
+          a안에 b의 값들이 모두 있니?(포함)
+ - retainAll()
+   · 교집합을 제외한 나머지 값을 지운다.
+     ex) a.retainsAll(b);
+          a와 b의 교집합을 제외한 나머지 값을 지움
+ - removeAll()
+   · retainAll()과 반대 = 교집합을 지운다.
+     ex) a.retainAll(b);
+          a와 b의 교집합을 지운다.
+
+ ※ 메소드 이름 앞에 is, has가 있으면 리턴타입이 boolean 
+ ※ ArrayList는 toString()이 재정의되어 있어서 참조변수를 출력하면
+    [ , , ] 형태로 값이 출력된다.
+ ※ 제네릭<>에 타입을 안쓰면 모든 타입을 넣을 수 있는 것,
+     하지만 <Integer>를 쓰고 String을 넣으면 오류 발생
+ ※ ? : 임의라는 뜻
+
+Vector
+ - ArrayList와 동일한 내부 구조
+ - ArrayList와 다른 점★★★
+   · 동기화된 메소드로 구성되어 있기 때문에 
+     멀티 스레드가 동시에 이 메소드들을 실행할 수 없고,
+     하나의 스레드가 실행을 완료해야만 다른 스레드를 실행할 수 있다.
+     그래서 멀티 스레드 환경에서 안전하게 객체를 추가, 삭제할 수 있다.
+     = Thread Safe
+ - Iterator
+   · 반복자
+   · hasNext()와 next()를 사용
+     hasNext() : 값이 있으면 true, 없으면 false
+     next() : 순서대로 값을 준다.
+   · remove() : 컬렉션 순회(반복)중 remove를 할 일이 있을 경우 
+	       foreach문에서 List의 remove()를 사용하면
+	       ConcurrentModificationException 발생
+	       for문에서 remove()에 index를 넣으면
+	       삭제는 되지만 중복된 값은 1개만 지워짐
+	       그럴 때 iterator의 remove()를 사용
+   · Iterator<Board> iter = list.iterator();
+          while(iter.hasNext()) {
+               Board board = iter.next();
+     	        System.out.println(board);
+     }
+ - capacity() : 현재 배열의 크기를 리턴
+ - size() : 배열에 저장된 값의 갯수를 리턴
+ - trimToSize() : 배열의 크기를 배열에 저장된 값의 갯수만큼 줄임
+	         (줄인 후 add()하면 +1이 아니라 줄어들기 전의 크기로 돌아감)
+
+ ※ 프로그래밍에서 순회는 대체로 반복문에 의해 반복중이란 뜻
+
+LinkedList
+ - ArrayList와 사용 방법은 같지만 내부 구조가 다르다.
+   ArrayList = 내부 배열에 객체를 저장해서 index로 관리
+   LinkedList = 인접 주소를 링크해서 체인처럼 관리
+                    각 객체는 값과 앞, 뒤의 주소를 가지고 있다.
+ - 삽입, 삭제가 빈번하게 일어나면 LinkedList를 사용★★★★★
+    특정 인덱스의 객체를 삭제하면 앞, 뒤 링크만 변경되고
+    나머지 링크는 변경되지 않음, 삽입도 마찬가지
+    (ArrayList는 삽입, 삭제된 다음 객체부터 끝까지 다 변동된다.)
+ - addFirst(), push()
+   · 맨 앞에 매개값을 넣는다.
+   · add(0, 매개값)과 같다.
+ - addLast()
+   · 맨 뒤에 매개값을 넣는다.
+ - offer()
+   · add()와 같지만 리턴 타입이 boolean
+     값이 들어갈 수 있으면 값을 넣고 true, 아니면 false
+ - element(), getFirst(), peek(), peekFirst()
+   · 맨 앞에 있는 값을 리턴
+   · get(0)과 같다.
+ - getLast(), peekLast()
+   · 맨 뒤에 있는 값을 리턴
+ - poll(), pollFirst(), pop()
+   · 맨 앞에 값을 추출 후 삭제
+ - pollLast()
+   · 맨 뒤에 값을 추출 후 삭제
+ - removeFirst()
+   · 맨 앞에 값을 삭제
+   · remove(0)과 같다.
+ - removeLast()
+   · 맨 뒤에 값을 삭제
+ - removeFirstOccurrence()
+   · 맨 앞에부터 검색해서 삭제
+   · 값이 중복인 경우 앞에 있는 값을 삭제
+ - removeLastOccurrence()
+   · 맨 뒤에부터 검색해서 삭제
+   · 값이 중복인 경우 뒤에 있는 값을 삭제

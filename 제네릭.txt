@@ -1,0 +1,159 @@
+※ parameter : 매개변수, <>에 들어있는 타입
+
+제네릭
+ - 자료형을 정하지 않은 기법
+    (외부에서 지정)
+ - 클래스, 인터페이스, 메소드를 정의할 때 
+    타입을 파라미터로 사용할 수 있도록 함
+    (타입 파라미터는 코드 작성 시 구체적인 타입으로 대체)
+ - 사용하는 이유
+   · 잘못된 타입이 사용될 수 있는 문제를 컴파일 과정에서 제거할 수 있도록
+ - 특징
+   · 컴파일 시 강한 타입 체크
+   · 타입 변환을 제거
+     ex) ArrayList list = new ArrayList();//제네릭을 사용하지 않을 경우
+          list.add("test");
+          String temp = (String) list.get(0);//타입 변환이 필요함
+
+          ArrayList<String> list2 = new ArrayList();//제네릭을 사용할 경우
+          list2.add("test");
+          temp = list2.get(0);//타입 변환이 필요없음
+
+ - 제네릭 타입(class<T>, interface<T>)
+   · 타입을 파라미터로 가지는 클래스와 인터페이스
+   · 모든 종류의 객체를 저장하면서 타입 변환이 발생하지 않도록 제네릭을 이용
+   · 예시
+     - public class Box{
+            Object obj;
+            public void setBox(Object obj){this.obj=obj;}
+            public Object getBox(){return obj;}
+       } 
+       Box box = new Box();
+       box.set("Hi");
+       String str = (String)box.get();
+       Object 타입은 모든 종류를 저장할 수 있지만, 
+       저장할 때나 읽어올 때 타입변환이 발생함.
+       = 프로그램 성능 저하
+     - public class Box<T>{
+            T t;
+	public void setBox(T t){this.t=t;}
+	public T getBox(){return t;}
+       }
+       Box<String> box = new Box();
+       box.set("Hi");
+       String str = box.get();
+       타입 파라미터 T를 사용해서 Object 타입을 모두 T로 대체
+       T는 Box로 객체를 생성할 때 구체적인 타입으로 변경
+   ※ 제네릭이 붙은 클래스의 객체를 생성할 때 타입을 주는 것.
+
+ - 멀티 타입 파라미터(class<K, V, ...>, interfact<K, V, ...>)
+   · 두 개 이상의 멀티 타입 파라미터를 사용할 수 있다. (","로 구분)
+   · 자바 7부터 <> 연산자 사용 가능
+     - 앞에서 타입을 적었으면 뒤에는 생략 가능
+   · 예시
+     - public class Product<T, M>{
+            T kind;
+            M model;
+       }
+       Product<Tv, String> p = new Product<>();
+       Product<Car, String> c = new Product<>();
+
+ - 제네릭 메소드(<T, R> R method(T t))
+   · 매개 타입과 리턴 타입으로 타입 파라미터를 갖는 메소드
+     (위에서 T는 매개타입 R은 리턴타입)
+
+   · 제네릭 메소드를 정의할 때 리턴 타입이 무엇인지와는 상관없이
+     내가 제네릭 메소드라는 것을 컴파일러에게 알려줘야 한다.
+     = 리턴타입 앞에 <타입 파라미터>를 쓴다.
+        (메소드에서 사용할 타입들을 쓰는 것)
+
+   · 제네릭 클래스가 아닌 일반 클래스에도 제네릭 메소드를 정의 할 수 있다.
+     = 클래스에 지정된 타입 파라미터와 
+        제네릭 메소드에 정의된 타입 파라미터는 상관 없음
+        = 제네릭 클래스에 <T>를 사용하고 제네릭 클래스 안에
+           제네릭 메소드에도 <T>로 같은 이름을 가진 타입 파라미터를 써도
+           둘은 전혀 관계가 없다.
+   · 예시
+     - public <T,Box> Box boxing(T t){return Box의 객체;}
+
+   · 호출 시 2가지 방법
+     - 1) 코드에서 타입 파라미터의 구체적인 타입을 명시적으로 지정
+           리턴타입 변수 = <구체적타입> 메소드명(매개값);
+     - 2) 컴파일러가 매개값의 타입을 보고 구체적인 타입을 추정
+           리턴타입 변수 = 메소드명(매개값);
+
+ - 제한된 타입 파라미터(<T extends 최상위타입>)
+   · 타입 파라미터에 지정되는 구체적인 타입을 제한할 때 사용
+     - 구체적인 타입은 상위 타입이거나 
+       상위 타입의 하위 또는 구현 클래스만 가능(아무리 높아도 최상위의 자식클래스만)
+       단, 메소드의 { } 안에서 타입 파라미터 변수로 사용 가능한 것은
+       상위 타입의 멤버로 제한
+       (하위 타입에만 있는 필드, 메소드는 사용 x
+        Number를 상위 타입으로 하면 Number의 멤버만 사용 가능)
+   · 선언
+     - 타입 파라미터 뒤에 extends 상위 타입
+       (클래스 or 인터페이스
+       인터페이스를 사용해도 extends를 씀)
+   · 예시
+     public <T extends 상위타입> 리턴타입 메소드(매개변수, ...) { }
+     <T extends Number>에 T는 Number의 하위만 넣을 수 있는 것
+     단, Number의 멤버만 쓸 수 있다.
+
+ - 와일드카드 타입(<?>, <? extends T>, <? super T>)
+   · 코드에서 "?"를 일반적으로 와일드카드라고 부름
+   · 타입 파라미터가 의미있게 사용되지 않으면 와일드카드 사용
+   · 무엇이 들어가도 상관없고, 데이터로 무엇을 하는지가 중요할 때
+     1) 제네릭타입<?>
+        - Unbounded Wildcards(제한 없음)
+        - 모든 클래스나 인터페이스 타입이 올 수 있다.
+        - Object 클래스의 멤버만 사용할 경우
+        - 제네릭 클래스의 메소드 중 
+           타입 파라미터에 의존하지 않는 메소드만 사용할 경우
+        - ex) public String str(List<?>list) {
+	        return "";
+	   }
+     2) 제네릭타입<? extends 상위타입>
+        - Upper Bounded Wildcards(상위 클래스 제한)
+        - 상위타입이나 상위타입의 자식들만 들어갈 수 있음
+        - Number를 쓰면 Number, Integer, Double, Byte 등 사용 가능
+        - ex) public int i(List<? extends Number> list, Map map) {
+	        return 0;
+	   }
+     3) 제네릭타입<? super 하위타입>
+        - Lower Bounded Wildcards(하위 클래스 제한)
+        - 하위타입이나 하위타입의 부모만 들어갈 수 있음
+        - ?가 하위타입의 부모클래스여야 함★★
+        - ?만 쓸 수 있음
+        - Integer를 쓰면 Integer, Object, Number 사용 가능
+        - ex) public List<? super Number> test(List<? super Number> list){
+	        return list;
+	   }
+   · 예시
+              Person
+     Worker        Student   
+	          HighStudent
+     메소드<?> : 메소드는 모든 타입이 될 수 있다.
+     메소드<? extends Student> : Student와 HighStudent만 될 수 있다.
+     메소드<? super Worker> : Worker와 Person만 될 수 있다.
+
+ ※ 타입 파라미터로 배열을 생성하려면 new T[n]형태로 배열을 생성할 수 없고,
+     (T[])(new Object[n]) 형태로 해야함
+     어떤 타입이 올지 모르기 때문에 Object 타입의 배열에
+     매개변수로 받은 n을 크기로 주고 T[] 타입으로 형변환을 하는 것
+     ex) private T[] array;
+          private V v;
+          public 생성자명(V v, int length){
+               array = (T[])(new Ojbect[length]);
+               this.v = v;
+          }
+ ※ 운영체제에서 보는 와일드 문자
+   · 와일드 문자 = 아무거나 들어갈 수 있음
+   · * : 여러글자를 대신 하는 와일드 문자
+   · ? : 한글자만 대신 하는 와일드 문자
+
+ - 제네릭 타입의 상속과 구현
+   · 제네릭 타입도 부모 클래스가 될 수 있다.
+     ex) public class ChildProduce<T, M> extends Product<T, M>{ }
+   · 자식 제네릭 타입은 추가적으로 타입 파라미터를 가질 수 있고,
+     자식의 제네릭은 부모의 제네릭보다 같거나 많아야 한다.
+     ex) public class ChildProduce<T, M, C> extends Product<T, M>{ }

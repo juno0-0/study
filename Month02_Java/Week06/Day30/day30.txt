@@ -1,0 +1,125 @@
+Hashtable
+ - HashMap과 차이점은 동기화된 메소드로 구성되어 있는 점
+    멀티스레드 작업에서 사용
+ - 사용방법은 HashMap과 같다
+
+Properties
+ - Hashtable의 하위 클래스라서 Hashtable의 모든 특성을 그대로 가지고 있다.
+ - 차이점은 Hashtable은 키와 값을 다양한 타입으로 지정이 가능하지만
+   Properties는 키와 값을 String 타입으로 제한★
+ - 애플리케이션의 옵션 정보, 데이터베이스 연결 정보, 국제화(다국어) 정보가
+   저장된 프로퍼티 파일을 읽을 때 주로 사용
+ - put() 대신 setProperty()를 사용해도 된다.
+ - get() 대신 getProperty()를 사용해도 된다.
+ - Hashtable은 HashMap과 같은 구조인데 
+   그 하위 클래스인 Properties도 같은 구조로 이루어짐
+ 
+
+  HashMap의 key는 내부적으로 Set처럼 처리가 된다.
+   질문이 Map에서 key부분이 정렬이 되지 않는 것에 대한 질문이었습니다. 
+Properties의 키도 정렬되지 않는 것?
+강사님 아무리 생각해도 왜 Map의 Properties가 
+ Set타입이 되서 무작위로 출력된건지 모르겠습니다.. 
+나중에 시간 나실 때 알려주세요 ㅠㅠ
+
+답변 : Map의 기본구현은 HashMap입니다. 
+key부분은 Set처럼 처리하기 때문에 키는 중복허용하지 않습니다
+Set의 기본은 HashSet입니다. 
+Set은 구술 주머니입니다
+구술 주머니는 순서가 정해지지 않죠  
+그래서 HashSet처럼 HashMap도 key의 순서가 정해 지지 않은 거죠
+구술 주머니에 담기니깐요 
+나에서 IT 강남 A Class에게:  (비공개로) 11:05 AM
+그럼 HashMap의 key는 내부적으로 Set처럼 처리가 된다는 말씀이신가용?
+
+
+
+TreeMap
+ - firstEntry() : 가장 낮은 Map.Entry를 리턴
+ - lastEntry() : 가장 높은 Map.Entry를 리턴
+ - lowerEntry() : 주어진 키보다 바로 아래 Map.Entry를 리턴
+ - higherEntry() : 주어진 키보다 바로 위에 Map.Entry를 리턴
+ - floorEntry() : 주어진 키와 같은 키가 있으면 그걸 리턴,
+                    없으면 바로 아래의 Map.Entry를 리턴
+ - ceilingEntry() : 주어진 키와 같은 키가 있으면 그걸 리턴,
+                    없으면 바로 위의 Map.Entry를 리턴
+ - pollFirstEntry() : 제일 낮은 Map.Entry를 추출 후 삭제
+ - pollLastEntry() : 제일 높은 Map.Entry를 추출 후 삭제
+ - NavigableSet<K>      descendingKeySet()        내림차순으로 정렬된 키의 NavigableSet을 리턴
+
+ - NavigableMap<K>    descendingKeyMap()        내림차순으로 정렬된 키의 NavigableMap을 리턴  
+
+
+Collections
+ - 컬렉션과 관련된 메소드를 제공
+ - 정렬
+   · 퀵 > 합병 > 히프 > 쉘 > 버블 > 선택 > 삽입 순서로 빠르다.
+   · 안정성이란 동일한 값을 가지는 원소를 다시 정렬하지 않는 것
+   · 안정성은 같은 리스트를 반복하여 다른 기준에 따라 정렬할 때 중요
+
+타입을 변경할 때
+메소드확인하고 원하는 메소드 없으면 생성자를 확인
+
+Collections.sort(list, Collection.reverseOrder()) : 리스트 역순 정렬
+
+ - 섞기
+    · collections.Shuffle()
+
+
+Stack 클래스는 Vector의 자식클래스 = List의 구현클래스
+동기화되어 있음(메소드에 synchronized)
+후입선출 구조
+먼저 들어간게 나중에 나옴
+push(), peek(), pop()
+peek()와 pop()의 차이는
+peek()은 불러오기만 하는 것
+pop()은 스택에서 가져오는 것(스택에서 사라짐)
+
+Queue는 Collection을 상속받은 인터페이스
+선입선출, 선착순 구조
+offer(),peek(),poll()
+peek()와 poll()도 Stack의 peek()와 pop()과 같은 차이
+하드웨어적으로 이 구조를 이용하는 분야 : 스레드풀, 버퍼메모리, 채널메모리
+
+비동기화된 메소드를 동기화된 메소드로 래핑하는 메소드 sysnchronizedXXX()를 제공
+Collections의 synchronizedList(List<T> list) 
+	     synchronizedMap(Map<K,V> m)
+                 synchronizedSet(Set<T> s)
+
+병렬처리를 해주는 메소드 제공
+- 동기화된 컬렉션은 멀티 스레드 환경에서 하나의 스레드가 요소를 안정하게 처리하도록 도와주지만
+전체 요소를 빠르게 처리하는 못한다.
+- 하나의 스레드가 요소를 처리할 때 전체 잠금이 발생하여 다른 스레드는 대기 상태가 된다.
+- 그렇기 때문에 멀티 스레드가 병렬적으로 컬렉션의 요소들을 처리할 수 없다.
+- 자바는 멀티 스레드가 컬렉션의 요소를 병렬적으로 처리할 수 잇도록 특별한 컬렉션을 제공하고 있다.
+- java.util.concurrent패키지의 ConcurrentHashMap과 ConcurrentHashQueue이다.
+-  ConcurrentHashMap은 Map의 구현 클래스이다
+-  ConcurrentHashQueue는 Queue의 구현 클래스이다
+2) ConcurrentHashMap
+- 스레드에 안전하면서도 멀티 스레드가 요소를 병렬적으로 처리할 수 있다.
+- 원리
+ConcurrentHashMap은 부분 잠금을 사용하기 때문이다.
+예를 들어서 컬렉션에 10개의 요소가 저장되어 있을 경우 1개를 처리할 동안 
+전체 10개의 요소를 다른 스레드가 처리하지 못하도록 하는 것이 
+전체 잠금이라면 처리하는 요소가 포함된 부분만 잠금하고 나머지 부분은 
+다른 스레드가 변경할 수 있도록 하는 것이 부분 잠금이다
+
+​
+List계열 - 중복가능, 순서o
+ArrayList : 배열이 기반(배열구조), 추가할 때(값을 뒤로 붙일 때) 제일 빠름
+LinkedList : 연결이 기반(체인구조), 삽입,삭제가 빈번하게 일어날 때 사용
+Vector : 스레드
+
+Set계열 - 중복불가능, 순서x, 집합처리
+HashSet : 중복을 제거하고 싶을 때
+TreeSet : 정렬, 검색이 빠르다.
+LinkedHashSet : HashSet을 보완한 것, 중복불가능 순서o
+
+Map계열 - <키, 값>
+HashMap : Map의 기본적인 구조
+Hashtable : 스레드
+TreeMap : 정렬, 검색이 빠르다.
+Properties : 
+
+
+

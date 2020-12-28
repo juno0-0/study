@@ -1,0 +1,82 @@
+TreeSet
+ - compare()와 compareTo()
+   · compare()는 Comparator를 implements
+     메인이랑 비교할 클래스가 아닌 새로운 비교용 클래스를 만들어서 연결
+     (구체적이고 다양한 비교가 필요할 경우 사용하면 좋을 것 같음)
+   · compareTo()는 Comparable을 implements
+     비교할 클래스에 연결
+ - first() : 가장 낮은 값
+ - last() : 가장 높은 값
+ - lower() : 매개값 바로 아래 값
+ - higher() : 매개값 바로 윗 값
+ - floor() : 매개값이 있으면 매개값 리턴, 없으면 바로 아래 값
+ - ceiling() : 매개값이 있으면 매개값 리턴, 없으면 바로 윗 값
+ - pollFirst() : 낮은 값부터 추출 후 삭제
+   ※ poll ~ : 추출하고 트리에서 제거해주는 메소드란 의미
+ - headSet(String, boolean) : 매개값보다 낮은 값들을 
+			 NavigableSet<E> 타입으로 리턴 
+			 매개값 포함 여부는 boolean
+ - tailSet(String, boolean) : 매개값보다 높은 값들을 
+		           NavigableSet<E> 타입으로 리턴
+		           매개값 포함 여부는 boolean
+ - subSet(String, boolean, String, boolean) 
+    : 매개값1과 매개값2 사이의 값들을 NavigableSet<E> 타입으로 리턴
+      매개값1과 매개값2의 포함 여부는 각 뒤의 boolean
+     
+Map
+ - Key 1개와 Value 1개가 한 쌍인 구조
+ - 이름표(key)가 달린 값들이 Set구조로 주머니에 담겨있는 것
+   · 이름표는 주머니 밖에 있어서 이름표를 땡기면 값이 나옴
+     (검색이 굉장히 빠르다.)
+ - Key는 중복이 안되지만 Value는 중복이 가능
+    (기존에 있는 키와 같은 이름으로 키를 주고
+     값을 넣으면 기존의 키에 있던 값은 사라짐)★★
+     Set에서 중복 = 새로운 것 저장 안됨
+     Map에서 중복 = 새로운 것으로 수정됨
+ - entrySet() : 이름표(key)까지 전부 주머니에 들어가는 것
+   · 모든 key와 value를 Set에 담아서
+     Set<Map.Entry<K, V>>타입으로 리턴
+   · 사용 예시
+     Map<String, Integer> map = new HashMap<>();
+     Set<Map.Entry<String, Integer>> sMap = map.entrySet();
+     Iterator<Map.Entry<String,Integer>> iter = sMap.iterator();
+     while(iter.hasNext()){
+          Map.Entry<String, Integer> temp = iter.next();
+          temp.getKey();				
+          temp.getValue();
+     }
+     ※ iter.next();
+        iter.next(); while문 안에서 이렇게 두 번 사용하면
+        위에 있는 iter.next()와 아래 있는 iter.next()가 가지고 있는 주소가 다름.
+        왜냐하면 next()는 자기가 가진 주소를 주는 것인데
+        처음 호출했을 때 1번을 줬고, 
+        밑에 줄에서 다시 호출했을 때 2번을 주기 때문이다.
+ - get()
+   · 매개값으로 주어진 key의 value를 리턴(key를 주면 value를 받는다.)
+ - keySet()
+   · 모든 키를 Set에 담아서 Set<> 타입으로 리턴
+ - values() 
+   · 모든 값을 Collection에 담아서
+     Collection<> 타입으로 리턴
+ ※ Hashtable과 HashMap은 거의 똑같지만
+    HashMap이 더 메소드가 다양해서 보통 HashMap을 사용
+    (HashMap이 더 나중에 나옴)
+ ※ 객체지향 언어의 코드
+     1. 비객체지향 처리 코드
+        Object[] Key;
+        Object[] Value;
+
+     2. 객체지향 처리 코드
+        Entry[] table;
+        class Entry{		<- 더 효율적이다.
+             Object key;
+             Object value;
+        }
+
+ - HashMap
+   · 기본적인 Map
+   · 키와 값의 타입은 클래스 or 인터페이스만 가능
+   · put(K, V) : 키와 값을 입력
+   · size() : 맵에 있는 (K, V)의 갯수
+
+   ※ HashMap을 만들 때 주석으로 Key와 Value가 뭘 가르키는지 표시하기

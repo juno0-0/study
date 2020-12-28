@@ -8,7 +8,7 @@ git add .
     폴더에 모든 파일을 트래킹한다는 뜻
 git commit -m "msg"
  - git에 push할 때 알리기 위한 커밋을 달아주는 명령어
-git push origin master
+git push origin +master
  - git에 올려주는 명령어
 
 파일 내려받기
@@ -19,3 +19,5 @@ git pull origin master
 
 github에 연동해놓은 해당파일을 변경할 경우
 git commit을 바꾸고 push해야 올라간다.
+
+※ push 전에 pull이 있다.

@@ -1,0 +1,5 @@
+알고리즘 메모장
+while(sc.hasNextInt())
+ - 입력값이 정수가 아닐 때까지 true 
+    아닐 경우 false
+ ※sc.hasNextLine()을 쓰면 무한반복이 돈다...
