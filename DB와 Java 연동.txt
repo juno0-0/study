@@ -1,0 +1,70 @@
+Java DataBase Connectivity
+데이터베이스에 연결 및 작업을 하기 위한 자바 표준 인터페이스
+
+JDBC 관련 interface
+Java.sql.Driver: 드라이버를 관련하는 패키지
+Java.sql.Connection: 드라이버의 연결정보
+Java.sql.Statement: 쿼리하는 방법을 가지고있는 (DB에 전송)하는 인터페이스
+Java.sql.ResultSet: 쿼리문을 통해 가져오는 결과를 조회하는 인터페이스
+Java.sql.PreparedStatement: statement의 서브인터페이스, 실행속도를 높이기 위해 미리 준비된 statement
+Java.sql.CallableStatement: preparedstatement의 서브 인터페이스
+
+JDBC코딩순서
+JDBC드라이버로딩 -> DB와 연결 -> 쿼리문 작성 -> 결과값을 활용
+
+JDBC드라이버 설치방법
+oracle에서 JDBC jar파일 다운로드(DBMS버전에 맞게)
+C:\Program Files\Java\jre1.8.0_271\lib\ext (JDK경로) 에 붙여넣기 (jar 그대로)
+오라클은 EE버전이여한다.
+
+컴퓨터관리 - 서비스 및 응용프로그램 - 서비스 - oracle 시작
+
+scott계정없을때
+C:\oraclexe\app\oracle\product\11.2.0\server\rdbms\admin\scott.sql
+
+1. 드라이버 로딩
+Class.forName("클래스 이름");: 동적 바인딩 메소드 (프로그램 실행 시 드라이버 로딩)
+클래스이름: "oracle.jdbc.driver.OracleDriver"
+
+2. 데이터베이스 연결
+URL: jdbc:oracle:드라이버타입:[계정명/비밀번호]@[//]호스트명[:port][/XE]
+드라이버타입:
+thin -> 무료버전이다
+oci -> 실제 기업에서 금액을 지불
+호스트명: localhost, 127.0.0.1 -> 현재 내 PC
+포트번호: 오라클 기본값이 1521, 기본값이라면 작성하지 않아도 되며 수정하였다면 수정한 포트번호를 입력
+확인방법 : C:\oraclexe\app\oracle\product\11.2.0\server\network\ADMIN\listener.ora
+DriverManager: 로딩한 드라이버를 관리해준다.
+Connection: 연결정보를 가지고 있다.
+**Connection [참조변수] = DriverManager.getConnection(url, id, pw);
+
+3. 데이터베이스에 SQL문을 전송(statement객체)
+**statement [참조변수] = [connection참조변수].createStatement();
+
+4. 데이터베이스에 SQL문을 전송(실전송)
+java.sql.ResultSet : SELECT 등의 조회 쿼리문을 실행한 후 돌아오는 조회 값을 포함하는 클래스
+ResultSet의 구조
+-> 결과로 가져온 데이터는 Table형태와 흡사
+-> ResultSet의 next()를 사용하여 값이 있는지 없는지 확인
+-> next() 실행 후, get..() 메소드를 사용하여 값을 얻어옴
+-> 여러 행이 있을 경우 반복문을 사용
+**ResultSet [참조변수] = [statement참조변수].excuteQuery(SQL문);
+
+PreparedStatement의 setString(), setInt(), setDouble()
+-> 쿼리문이 유동적인 경우 '?'로 대체할 수 있음
+-> '?'에 대체할 데이터가 문자열이라면 setString()을, 정수라면 setInt(), 실수는 setDouble() 등을 사용
+예) ps = con.prepateStatement("SELECT * FROM student WHERE st_name = ? AND st_NO = ?");
+ps.setString(1, "홍길동"); // 1번 물음표 자리에 "홍길동"을 String 형태로 삽입하라 (외따옴표 추가됨)
+ps.setInt(2, 3) // 2번 물음표 자리에 3을 int 형태로 삽입하라.
+
+PreparedStatement의 execute(), executeUpdate(), executeQuery()
+1. boolean execute(): 쿼리를 실행한 뒤, 리턴되는 결과가 ResultSet 객체면 true, int형 정수거나 결과값이 없으면 false 
+2. int executeUpdate(): 쿼리를 실행한 뒤, 적용된 행의 개수를 return (몇 행이 적용되었는지 궁금할때 이용)
+3. ResultSet executeQuery(): 쿼리를 실행한 뒤, 조회된 결과를 ResultSet에 담아 테이블 형태로 return
+
+5. 데이터를 가져와서 출력
+resultSet.next()를 이용하여 값이 있는지 여부 확인
+resultSet.get...를 이용하여 값을 가져온다.
+
+6. 데이터베이스와 연결된 자원을 반납
+if문을 이용하여 resultSet, statement, connection이 null이 아닐 때 닫아준다.
